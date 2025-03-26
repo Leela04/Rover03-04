@@ -25,8 +25,8 @@ const CommandConsole = ({ className, selectedRoverId }: CommandConsoleProps) => 
   });
   
   const { data: commandLogs } = useQuery<CommandLog[]>({
-    queryKey: roverId ? [`/api/rovers/${roverId}/command-logs`] : null,
-    enabled: !!roverId,
+    queryKey: roverId && roverId !== 'all' ? [`/api/rovers/${roverId}/command-logs`] : ['/api/command-logs'],
+    enabled: true,
     refetchInterval: 2000,
   });
   
@@ -41,6 +41,8 @@ const CommandConsole = ({ className, selectedRoverId }: CommandConsoleProps) => 
   useEffect(() => {
     if (selectedRoverId) {
       setRoverId(selectedRoverId.toString());
+    } else {
+      setRoverId("all");
     }
   }, [selectedRoverId]);
   
@@ -116,7 +118,7 @@ const CommandConsole = ({ className, selectedRoverId }: CommandConsoleProps) => 
             <SelectValue placeholder="Select Rover" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Rovers</SelectItem>
+            <SelectItem value="all">All Rovers</SelectItem>
             {rovers?.map((rover) => (
               <SelectItem key={rover.id} value={rover.id.toString()}>
                 {rover.name}

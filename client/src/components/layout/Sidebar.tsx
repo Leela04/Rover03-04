@@ -49,18 +49,18 @@ const Sidebar = () => {
         <ul>
           {navItems.map((item) => (
             <li key={item.href}>
-              <Link href={item.href}>
-                <a
-                  className={`flex items-center px-3 py-2 rounded-md mb-1 ${
-                    (location === item.href || (item.href !== "/" && location.startsWith(item.href)))
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:bg-muted"
-                  }`}
-                >
-                  {item.icon}
-                  {item.label}
-                </a>
-              </Link>
+              <div
+                className={`flex items-center px-3 py-2 rounded-md mb-1 ${
+                  (location === item.href || (item.href !== "/" && location.startsWith(item.href)))
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:bg-muted"
+                }`}
+                onClick={() => window.location.href = item.href}
+                style={{ cursor: 'pointer' }}
+              >
+                {item.icon}
+                {item.label}
+              </div>
             </li>
           ))}
         </ul>
