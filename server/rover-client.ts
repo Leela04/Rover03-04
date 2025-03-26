@@ -6,7 +6,8 @@
  */
 
 import WebSocket from 'ws';
-import * as rclnodejs from 'rclnodejs';
+// Import our mock implementation instead of the actual rclnodejs
+import * as rclnodejs from './mock-rclnodejs';
 
 interface SensorData {
   temperature?: number;
