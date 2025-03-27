@@ -1,13 +1,12 @@
 /**
  * This file demonstrates how a rover client would be implemented.
- * It would typically run on the rover hardware and use rclnodejs to communicate with ROS2.
+ * In a real implementation, this would typically run on the rover hardware 
+ * and could use rclnodejs to communicate with ROS2.
  * 
- * This is a sample implementation for reference.
+ * This is a simplified implementation for demonstration purposes.
  */
 
 import WebSocket from 'ws';
-// Import our mock implementation instead of the actual rclnodejs
-import * as rclnodejs from './mock-rclnodejs';
 
 interface SensorData {
   temperature?: number;
@@ -29,9 +28,6 @@ class RoverClient {
   private roverIdentifier: string;
   private serverUrl: string;
   private connected = false;
-  private rclNode: rclnodejs.Node | null = null;
-  private sensorPublishers: Map<string, rclnodejs.Publisher> = new Map();
-  private commandSubscription: rclnodejs.Subscription | null = null;
   private reconnectInterval: NodeJS.Timeout | null = null;
   private pingInterval: NodeJS.Timeout | null = null;
   
@@ -42,50 +38,13 @@ class RoverClient {
   
   async initialize() {
     try {
-      // Initialize ROS2 node
-      await rclnodejs.init();
-      this.rclNode = new rclnodejs.Node(`rover_${this.roverIdentifier}`);
-      
-      // Create publishers for sensor data
-      this.setupRosPublishers();
-      
-      // Create subscription for commands
-      this.setupRosSubscriptions();
-      
-      // Start ROS2 node
-      this.rclNode.spin();
-      
-      console.log('ROS2 node initialized');
+      console.log(`Initializing rover client ${this.roverIdentifier}`);
       
       // Connect to server
       this.connect();
     } catch (error) {
       console.error('Failed to initialize rover client:', error);
     }
-  }
-  
-  private setupRosPublishers() {
-    if (!this.rclNode) return;
-    
-    // Create publishers for various sensor data
-    this.sensorPublishers.set('temperature', this.rclNode.createPublisher('std_msgs/msg/Float32', 'temperature'));
-    this.sensorPublishers.set('humidity', this.rclNode.createPublisher('std_msgs/msg/Float32', 'humidity'));
-    this.sensorPublishers.set('pressure', this.rclNode.createPublisher('std_msgs/msg/Float32', 'pressure'));
-    // Add more publishers for other sensors
-  }
-  
-  private setupRosSubscriptions() {
-    if (!this.rclNode) return;
-    
-    // Subscribe to command topic
-    this.commandSubscription = this.rclNode.createSubscription(
-      'std_msgs/msg/String',
-      'commands',
-      (msg: any) => {
-        console.log('ROS command received:', msg.data);
-        // Process command from ROS
-      }
-    );
   }
   
   private connect() {
@@ -198,25 +157,16 @@ class RoverClient {
           console.log(`Moving ${direction} ${distance} units`);
           response = `Moving ${direction} ${distance} units`;
           
-          // Publish to ROS2 topic
-          if (this.rclNode) {
-            const msg = {
-              data: `move ${direction} ${distance}`
-            };
-            // Example of publishing to a ROS2 topic
-            this.rclNode.createPublisher('std_msgs/msg/String', 'movement_commands').publish(msg);
-          }
+          // In a real implementation, this would communicate with the rover's movement system
+          // Here we just log the command
           break;
         
         case 'stop':
           console.log('Emergency stop');
           response = 'Emergency stop engaged';
           
-          // Publish to ROS2 topic
-          if (this.rclNode) {
-            const msg = { data: 'stop' };
-            this.rclNode.createPublisher('std_msgs/msg/String', 'movement_commands').publish(msg);
-          }
+          // In a real implementation, this would communicate with the rover's movement system
+          // Here we just log the command
           break;
         
         case 'camera':
@@ -314,12 +264,7 @@ class RoverClient {
       this.ws = null;
     }
     
-    // Shutdown ROS2 node
-    if (this.rclNode) {
-      this.rclNode.destroy();
-      await rclnodejs.shutdown();
-      this.rclNode = null;
-    }
+    // In a real implementation, we would clean up any hardware resources here
     
     console.log('Rover client shutdown complete');
   }

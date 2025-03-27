@@ -1,6 +1,6 @@
 /**
  * This script can be used to start a simulated rover client that connects to the server.
- * It uses the mock rclnodejs implementation to avoid requiring an actual ROS installation.
+ * It starts a simplified version of the rover client that sends simulated sensor data.
  */
 
 import { exec } from 'child_process';
