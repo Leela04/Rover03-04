@@ -8,17 +8,21 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export interface RoverListProps {
   className?: string;
-  onSelectRover?: (roverId: number) => void;
+  onSelectRover?: (roverId: number | null) => void;
 }
 
 // Get status indicator color
 const getStatusIndicator = (status?: string, connected?: boolean) => {
   if (!connected) return "connection-dot connection-disconnected";
   switch (status) {
-    case "active": return "connection-dot connection-active";
-    case "idle": return "connection-dot connection-idle";
-    case "error": return "connection-dot connection-error";
-    default: return "connection-dot connection-disconnected";
+    case "active":
+      return "connection-dot connection-active";
+    case "idle":
+      return "connection-dot connection-idle";
+    case "error":
+      return "connection-dot connection-error";
+    default:
+      return "connection-dot connection-disconnected";
   }
 };
 
@@ -26,10 +30,14 @@ const getStatusIndicator = (status?: string, connected?: boolean) => {
 const getStatusLabel = (status?: string, connected?: boolean) => {
   if (!connected) return "Disconnected";
   switch (status) {
-    case "active": return "Online";
-    case "idle": return "Idle";
-    case "error": return "Error";
-    default: return "Disconnected";
+    case "active":
+      return "Online";
+    case "idle":
+      return "Idle";
+    case "error":
+      return "Error";
+    default:
+      return "Disconnected";
   }
 };
 
@@ -37,19 +45,23 @@ const getStatusLabel = (status?: string, connected?: boolean) => {
 const getStatusLabelColor = (status?: string, connected?: boolean) => {
   if (!connected) return "bg-gray-100 text-gray-800";
   switch (status) {
-    case "active": return "bg-green-100 text-green-800";
-    case "idle": return "bg-yellow-100 text-yellow-800";
-    case "error": return "bg-red-100 text-red-800";
-    default: return "bg-gray-100 text-gray-800";
+    case "active":
+      return "bg-green-100 text-green-800";
+    case "idle":
+      return "bg-yellow-100 text-yellow-800";
+    case "error":
+      return "bg-red-100 text-red-800";
+    default:
+      return "bg-gray-100 text-gray-800";
   }
 };
 
 const RoverList = ({ className, onSelectRover }: RoverListProps) => {
   const { data: rovers, isLoading } = useQuery<Rover[]>({
-    queryKey: ['/api/rovers'],
+    queryKey: ["/api/rovers"],
     refetchInterval: 5000,
   });
-  
+
   if (isLoading) {
     return (
       <Card className={className}>
@@ -66,7 +78,7 @@ const RoverList = ({ className, onSelectRover }: RoverListProps) => {
       </Card>
     );
   }
-  
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -76,23 +88,40 @@ const RoverList = ({ className, onSelectRover }: RoverListProps) => {
         {rovers && rovers.length > 0 ? (
           <>
             {rovers.map((rover) => (
-              <div key={rover.id} className="bg-gray-50 rounded-lg p-3 mb-3 border border-gray-200">
+              <div
+                key={rover.id}
+                className="bg-gray-50 rounded-lg p-3 mb-3 border border-gray-200"
+              >
                 <div className="flex justify-between items-center mb-2">
                   <div className="flex items-center">
-                    <span className={getStatusIndicator(rover.status, rover.connected)}></span>
+                    <span
+                      className={getStatusIndicator(
+                        rover.status ?? "",
+                        rover.connected ?? false
+                      )}
+                    ></span>
                     <h4 className="font-medium">{rover.name}</h4>
                   </div>
-                  <div className={`text-xs px-2 py-1 rounded-full ${getStatusLabelColor(rover.status, rover.connected)}`}>
+                  <div
+                    className={`text-xs px-2 py-1 rounded-full ${getStatusLabelColor(
+                      rover.status ?? "",
+                      rover.connected ?? false
+                    )}`}
+                  >
                     {getStatusLabel(rover.status, rover.connected)}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 text-sm text-muted-foreground">
-                  <div>ID: <span className="font-mono">{rover.identifier}</span></div>
-                  <div>Battery: <span>{rover.batteryLevel}%</span></div>
+                  <div>
+                    ID: <span className="font-mono">{rover.identifier}</span>
+                  </div>
+                  <div>
+                    Battery: <span>{rover.batteryLevel}%</span>
+                  </div>
                 </div>
                 <div className="mt-3 flex space-x-2">
-                  <Button 
-                    variant="default" 
+                  <Button
+                    variant="default"
                     size="sm"
                     onClick={() => onSelectRover && onSelectRover(rover.id)}
                   >

@@ -7,32 +7,44 @@ import { Rover, SensorData } from "@shared/schema";
 import { Gauge } from "@/components/ui/gauge";
 import { useCommand } from "@/lib/commands";
 import { useToast } from "@/hooks/use-toast";
-import { AlertOctagon, ArrowDown, ArrowLeft, ArrowRight, ArrowUp, StopCircle, BellRing, Lightbulb } from "lucide-react";
+import {
+  AlertOctagon,
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  StopCircle,
+  BellRing,
+  Lightbulb,
+} from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export interface RoverControlProps {
   className?: string;
-  roverId: number;
+  roverId: string;
 }
 
 const RoverControl = ({ className, roverId }: RoverControlProps) => {
   const [speed, setSpeed] = useState(50);
   const { sendCommand } = useCommand();
   const { toast } = useToast();
-  
+
   const { data: rover, isLoading: isRoverLoading } = useQuery<Rover>({
     queryKey: [`/api/rovers/${roverId}`],
     refetchInterval: 5000,
   });
-  
-  const { data: sensorData, isLoading: isSensorDataLoading } = useQuery<SensorData[]>({
+
+  const { data: sensorData, isLoading: isSensorDataLoading } = useQuery<
+    SensorData[]
+  >({
     queryKey: [`/api/rovers/${roverId}/sensor-data`],
     refetchInterval: 2000,
   });
-  
+
   // Get latest sensor data
-  const latestSensorData = sensorData && sensorData.length > 0 ? sensorData[0] : null;
-  
+  const latestSensorData =
+    sensorData && sensorData.length > 0 ? sensorData[0] : null;
+
   // Handle movement command
   const handleMovement = async (direction: string) => {
     try {
@@ -48,7 +60,7 @@ const RoverControl = ({ className, roverId }: RoverControlProps) => {
       });
     }
   };
-  
+
   // Handle stop command
   const handleStop = async () => {
     try {
@@ -64,7 +76,7 @@ const RoverControl = ({ className, roverId }: RoverControlProps) => {
       });
     }
   };
-  
+
   // Handle toggle lights
   const handleToggleLights = async () => {
     try {
@@ -84,7 +96,7 @@ const RoverControl = ({ className, roverId }: RoverControlProps) => {
       });
     }
   };
-  
+
   // Handle voice transmission
   const handleVoiceTransmission = async () => {
     try {
@@ -104,7 +116,7 @@ const RoverControl = ({ className, roverId }: RoverControlProps) => {
       });
     }
   };
-  
+
   // Loading state
   if (isRoverLoading) {
     return (
@@ -118,26 +130,38 @@ const RoverControl = ({ className, roverId }: RoverControlProps) => {
       </Card>
     );
   }
-  
+
   // Get rover status color
   const getStatusColor = (status?: string, connected?: boolean) => {
     if (!connected) return "bg-gray-100 text-gray-800";
     switch (status) {
-      case "active": return "bg-green-100 text-green-800";
-      case "idle": return "bg-yellow-100 text-yellow-800";
-      case "error": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "active":
+        return "bg-green-100 text-green-800";
+      case "idle":
+        return "bg-yellow-100 text-yellow-800";
+      case "error":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
-  
+
   return (
     <Card className={className}>
       <CardHeader className="flex flex-row items-center justify-between py-4">
         <div className="flex items-center">
           <CardTitle>Rover Control: {rover?.name}</CardTitle>
           {rover && (
-            <div className={`ml-3 text-xs px-2 py-1 rounded-full ${getStatusColor(rover.status, rover.connected)}`}>
-              {rover.connected ? rover.status.charAt(0).toUpperCase() + rover.status.slice(1) : "Disconnected"}
+            <div className={`ml-3 text-xs px-2 py-1 rounded-full`}>
+              {/*rover.status,
+                //rover.connected
+                className={`ml-3 text-xs px-2 py-1 rounded-full  ${getStatusColor(
+                //rover.status,
+                //rover.connected*/}
+
+              {rover.connected
+                ? rover.status.charAt(0).toUpperCase() + rover.status.slice(1)
+                : "Disconnected"}
             </div>
           )}
         </div>
@@ -155,13 +179,17 @@ const RoverControl = ({ className, roverId }: RoverControlProps) => {
                 {rover?.connected ? (
                   <div className="text-center">
                     <p>Live camera feed would display here</p>
-                    <p className="text-sm text-gray-400 mt-1">Connected to {rover.name}</p>
+                    <p className="text-sm text-gray-400 mt-1">
+                      Connected to {rover.name}
+                    </p>
                   </div>
                 ) : (
                   <div className="text-center">
                     <AlertOctagon className="h-12 w-12 mx-auto mb-2 text-red-500" />
                     <p>Rover disconnected</p>
-                    <p className="text-sm text-gray-400 mt-1">Cannot display camera feed</p>
+                    <p className="text-sm text-gray-400 mt-1">
+                      Cannot display camera feed
+                    </p>
                   </div>
                 )}
               </div>
@@ -172,52 +200,64 @@ const RoverControl = ({ className, roverId }: RoverControlProps) => {
 
             <div className="mt-4 grid grid-cols-3 gap-3">
               <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 text-center">
-                <div className="text-sm text-muted-foreground mb-1">Front Camera</div>
-                <Button 
-                  variant="default" 
-                  size="sm" 
+                <div className="text-sm text-muted-foreground mb-1">
+                  Front Camera
+                </div>
+                <Button
+                  variant="default"
+                  size="sm"
                   className="w-full"
                   disabled={!rover?.connected}
-                  onClick={() => sendCommand({ roverId, command: "camera front" })}
+                  onClick={() =>
+                    sendCommand({ roverId, command: "camera front" })
+                  }
                 >
                   Activate
                 </Button>
               </div>
               <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 text-center">
-                <div className="text-sm text-muted-foreground mb-1">Rear Camera</div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <div className="text-sm text-muted-foreground mb-1">
+                  Rear Camera
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="w-full"
                   disabled={!rover?.connected}
-                  onClick={() => sendCommand({ roverId, command: "camera rear" })}
+                  onClick={() =>
+                    sendCommand({ roverId, command: "camera rear" })
+                  }
                 >
                   Activate
                 </Button>
               </div>
               <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 text-center">
-                <div className="text-sm text-muted-foreground mb-1">Instrument View</div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <div className="text-sm text-muted-foreground mb-1">
+                  Instrument View
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="w-full"
                   disabled={!rover?.connected}
-                  onClick={() => sendCommand({ roverId, command: "camera instrument" })}
+                  onClick={() =>
+                    sendCommand({ roverId, command: "camera instrument" })
+                  }
                 >
                   Activate
                 </Button>
               </div>
             </div>
           </div>
-          
+
           {/* Controls */}
           <div className="space-y-4">
             <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
               <h4 className="text-sm font-medium mb-3">Movement Controls</h4>
               <div className="grid grid-cols-3 gap-2 mb-2">
                 <div></div>
-                <Button 
-                  variant="default" 
+                <Button
+                  variant="default"
                   size="sm"
                   disabled={!rover?.connected}
                   onClick={() => handleMovement("forward")}
@@ -227,24 +267,24 @@ const RoverControl = ({ className, roverId }: RoverControlProps) => {
                 <div></div>
               </div>
               <div className="grid grid-cols-3 gap-2 mb-2">
-                <Button 
-                  variant="default" 
+                <Button
+                  variant="default"
                   size="sm"
                   disabled={!rover?.connected}
                   onClick={() => handleMovement("left")}
                 >
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
-                <Button 
-                  variant="default" 
+                <Button
+                  variant="default"
                   size="sm"
                   disabled={!rover?.connected}
                   onClick={handleStop}
                 >
                   <StopCircle className="h-5 w-5" />
                 </Button>
-                <Button 
-                  variant="default" 
+                <Button
+                  variant="default"
                   size="sm"
                   disabled={!rover?.connected}
                   onClick={() => handleMovement("right")}
@@ -254,8 +294,8 @@ const RoverControl = ({ className, roverId }: RoverControlProps) => {
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <div></div>
-                <Button 
-                  variant="default" 
+                <Button
+                  variant="default"
                   size="sm"
                   disabled={!rover?.connected}
                   onClick={() => handleMovement("backward")}
@@ -265,7 +305,9 @@ const RoverControl = ({ className, roverId }: RoverControlProps) => {
                 <div></div>
               </div>
               <div className="mt-4">
-                <label className="block text-xs text-muted-foreground mb-1">Speed</label>
+                <label className="block text-xs text-muted-foreground mb-1">
+                  Speed
+                </label>
                 <Slider
                   value={[speed]}
                   onValueChange={(value) => setSpeed(value[0])}
@@ -289,11 +331,11 @@ const RoverControl = ({ className, roverId }: RoverControlProps) => {
                   max={100}
                   size="md"
                   color={
-                    (rover?.batteryLevel || 0) > 60 
-                      ? "var(--color-success)" 
-                      : (rover?.batteryLevel || 0) > 20 
-                        ? "var(--color-warning)" 
-                        : "var(--color-danger)"
+                    (rover?.batteryLevel || 0) > 60
+                      ? "var(--color-success)"
+                      : (rover?.batteryLevel || 0) > 20
+                      ? "var(--color-warning)"
+                      : "var(--color-danger)"
                   }
                   label="Battery"
                   unit="%"

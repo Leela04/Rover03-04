@@ -42,7 +42,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Broadcast a message to all frontend clients
   function broadcastToFrontend(message: WebSocketMessage) {
     const timestampedMessage = ensureTimestamp(message);
-    for (const [socketId, client] of clients.entries()) {
+    for (const [socketId, client] of Array.from (clients.entries())) {
       if (client.type === 'frontend' && client.ws.readyState === WebSocket.OPEN) {
         client.ws.send(JSON.stringify(timestampedMessage));
       }
@@ -52,7 +52,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Send a message to a specific rover
   function sendMessageToRover(roverId: number, message: WebSocketMessage): boolean {
     const timestampedMessage = ensureTimestamp(message);
-    for (const [socketId, client] of clients.entries()) {
+    for (const [socketId, client] of Array.from(clients.entries())) {
       if (client.type === 'rover' && client.roverId === roverId && client.ws.readyState === WebSocket.OPEN) {
         client.ws.send(JSON.stringify(timestampedMessage));
         return true;
@@ -74,8 +74,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Store sensor data
         await storage.createSensorData(sensorDataPayload);
         
-        // Update rover battery level if provided
-        if (payload.sensorData.batteryLevel !== undefined) {
+        //* Update rover battery level if provided
+        if (payload.sensorData.batteryLevel !== null) {
           await storage.updateRover(roverId, {
             batteryLevel: payload.sensorData.batteryLevel,
             lastSeen: new Date()
@@ -98,25 +98,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Process command response
   async function processCommandResponse(roverId: number, payload: any) {
     try {
-      if (payload.commandId && payload.status) {
-        // Update command log with response
-        await storage.updateCommandLog(payload.commandId, {
-          status: payload.status,
-          response: payload.response || ''
-        });
+      if (!payload.commandId ||  !payload.status) {
+
+        console.error("Invalid payload received for command response:", payload);
+        return;
+      }
+
+      // Check for valid status values (pending, success, failed, etc.)
+      const validStatuses = ['pending', 'success', 'failed', 'error'];
+      if (!validStatuses.includes(payload.status)) {
+        console.error("Invalid status value:", payload.status);
+        return;
+      }
+
+
+      // Update command log with response
+      await storage.updateCommandLog(payload.commandId, {
+      status: payload.status,
+      response: payload.response || 'No response'
+      });
+
+      console.log(`Updated command ${payload.commandId} with status: ${payload.status}`);
+
         
         // Broadcast to frontend clients
-        broadcastToFrontend({
-          type: 'COMMAND',
-          roverId,
-          payload: {
-            commandId: payload.commandId,
-            status: payload.status,
-            response: payload.response
-          },
-          timestamp: Date.now()
-        });
-      }
+      broadcastToFrontend({
+        type: 'COMMAND_RESPONSE',
+        roverId,
+        payload: {
+          commandId: payload.commandId,
+          status: payload.status,
+          response: payload.response  || 'No response'
+        },
+        timestamp: Date.now()
+      });
+      
     } catch (error) {
       console.error('Error processing command response:', error);
     }
@@ -232,7 +248,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           case 'COMMAND': {
             // Handle command from frontend to rover
             if (validatedMessage.roverId) {
-              const roverId = validatedMessage.roverId;
+              const roverId= validatedMessage.roverId;
               const command = validatedMessage.payload.command;
               
               // Create command log
@@ -243,6 +259,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 response: ''
               });
               
+                            
               // Send command to rover
               const sent = sendMessageToRover(roverId, {
                 type: 'COMMAND',
@@ -275,6 +292,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
             break;
           }
+
+          case 'COMMAND_RESPONSE': {
+            // We no longer need to broadcast here, `processCommandResponse` already handles it
+            const { commandId, status, response } = validatedMessage.payload;
+
+            if (commandId) {
+            // Process the command response and broadcast to frontend
+              await processCommandResponse(Number(validatedMessage.roverId), validatedMessage.payload);
+
+            }
+            break;
+          }
+          
           
           case 'STATUS_UPDATE': {
             // Handle status updates from rovers
@@ -516,6 +546,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: 'Command sent successfully',
         commandId: commandLog.id
       });
+      
     } catch (error) {
       res.status(500).json({
         message: 'Error sending command',

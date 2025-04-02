@@ -39,37 +39,45 @@ export const sensorData = pgTable("sensor_data", {
   roverId: integer("rover_id").notNull(),
   timestamp: timestamp("timestamp").defaultNow(),
   temperature: real("temperature"),
-  humidity: real("humidity"),
-  pressure: real("pressure"),
-  altitude: real("altitude"),
-  heading: real("heading"),
-  speed: real("speed"),
-  tilt: real("tilt"),
+  //*humidity: real("humidity"),
+  //*pressure: real("pressure"),
+  //*altitude: real("altitude"),
+  //*heading: real("heading"),
+  //*speed: real("speed"),
+  //*tilt: real("tilt"),
   latitude: real("latitude"),
   longitude: real("longitude"),
   batteryLevel: integer("battery_level"),
-  signalStrength: integer("signal_strength")
+  signalStrength: integer("signal_strength"),
+  cpuUsage: real("cpu_usage"), // % CPU usage (e.g., 35.25)
+  memoryUsage: real("memory_usage"), // % Memory usage (e.g., 65.75)
+  
+
 });
 
 export const insertSensorDataSchema = createInsertSchema(sensorData).pick({
   roverId: true,
   temperature: true,
-  humidity: true,
-  pressure: true,
-  altitude: true,
-  heading: true,
-  speed: true,
-  tilt: true,
+  //*humidity: true,
+  //*pressure: true,
+  //*altitude: true,
+  //*heading: true,
+  //*speed: true,
+  //*tilt: true,
   latitude: true,
   longitude: true,
   batteryLevel: true,
   signalStrength: true,
+  cpuUsage: true,
+  memoryUsage: true,
+
+
 });
 
 // Command Log schema
 export const commandLogs = pgTable("command_logs", {
   id: serial("id").primaryKey(),
-  roverId: integer("rover_id").notNull(),
+  roverId: integer("rover_id").notNull(), //*integer to text
   command: text("command").notNull(),
   timestamp: timestamp("timestamp").defaultNow(),
   status: text("status").default("pending"), // pending, success, failed
@@ -86,7 +94,7 @@ export const insertCommandLogSchema = createInsertSchema(commandLogs).pick({
 // Rover Client schema - for socket connections
 export const roverClients = pgTable("rover_clients", {
   id: serial("id").primaryKey(),
-  roverId: integer("rover_id").notNull(),
+  roverId: integer("rover_id").notNull(), //*integer to text
   connected: boolean("connected").default(false),
   lastPing: timestamp("last_ping"),
   socketId: text("socket_id")
@@ -120,13 +128,16 @@ export const messageSchema = z.object({
     'CONNECT', 
     'DISCONNECT', 
     'COMMAND', 
-    'TELEMETRY', 
+    'TELEMETRY',
+    "COMMAND_RESPONSE", 
     'STATUS_UPDATE', 
     'ERROR'
   ]),
   payload: z.any(),
   timestamp: z.number().default(() => Date.now()),
-  roverId: z.number().optional(),
+  roverId: z.union([z.string(), z.number()]).optional(), // Allow both string or number for roverId
+
+  //*roverId: z.number().optional(),
   roverIdentifier: z.string().optional(),
 });
 

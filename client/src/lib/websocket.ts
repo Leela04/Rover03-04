@@ -27,6 +27,8 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = (props) => {
   const [connected, setConnected] = useState(false);
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
   const { toast } = useToast();
+  let reconnectAttempts = 0;
+
 
   const connectWebSocket = useCallback(() => {
     try {
@@ -77,6 +79,16 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = (props) => {
                 });
               }
               break;
+
+            case "COMMAND_RESPONSE":
+              if(message.roverId){
+                queryClient.invalidateQueries({
+                  queryKey:[`/api/rovers/${message.roverId}/command-logs`]
+                });
+              }
+              break;
+              
+          
               
             case 'ERROR':
               toast({
@@ -96,17 +108,27 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = (props) => {
         setConnected(false);
         
         // Try to reconnect after delay
+        //setTimeout(() => {
+          //if (document.visibilityState !== 'hidden') {
+           // connectWebSocket();
+          //}
+        //}, 3000);
+        
+        /*toast({
+         variant: "destructive",
+          title: "Disconnected from server",
+          description: "Attempting to reconnect...",
+        });
+        const retryDelay = Math.min(10000 * (2 ** reconnectAttempts), 60000); // Exponential backoff (max 1 min)
+        reconnectAttempts++;*/
+      
+
         setTimeout(() => {
           if (document.visibilityState !== 'hidden') {
             connectWebSocket();
           }
-        }, 3000);
-        
-        toast({
-          variant: "destructive",
-          title: "Disconnected from server",
-          description: "Attempting to reconnect...",
-        });
+        }, retryDelay);
+
       };
       
       ws.onerror = (error) => {
@@ -118,12 +140,15 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = (props) => {
       
       // Cleanup on unmount
       return () => {
-        ws.close();
+        if (ws.readyState === WebSocket.OPEN) { //*
+
+          ws.close();
+        }
       };
     } catch (error) {
       console.error('Error setting up WebSocket:', error);
     }
-  }, [toast]);
+  }, []);//* [toast]);
   
   useEffect(() => {
     connectWebSocket();
@@ -139,9 +164,9 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = (props) => {
     
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      if (socket) {
-        socket.close();
-      }
+      //if (socket) {
+        //socket.close();
+      //}
     };
   }, [connectWebSocket, connected, socket]);
   

@@ -2,51 +2,68 @@ import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useCommand, parseCommand } from "@/lib/commands";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
+import { useWebSocket } from "@/lib/websocket"; // Import WebSocket handling
+
 import { CommandLog, Rover } from "@shared/schema";
 
 export interface CommandConsoleProps {
   className?: string;
-  selectedRoverId?: number;
+  selectedRoverId?: number | null;
 }
 
-const CommandConsole = ({ className, selectedRoverId }: CommandConsoleProps) => {
+const CommandConsole = ({
+  className,
+  selectedRoverId,
+}: CommandConsoleProps) => {
   const [command, setCommand] = useState("");
-  const [roverId, setRoverId] = useState<string>(selectedRoverId?.toString() || "");
+  const [roverId, setRoverId] = useState<number | null>(
+    selectedRoverId ?? null
+  );
   const { sendCommand } = useCommand();
   const { toast } = useToast();
   const terminalRef = useRef<HTMLDivElement>(null);
-  
+  const lastSubmitRef = useRef<number | null>(null); // Prevent multiple submits
+
+  const { lastMessage } = useWebSocket(); // WebSocket message listener
+
   const { data: rovers } = useQuery<Rover[]>({
-    queryKey: ['/api/rovers'],
+    queryKey: ["/api/rovers"],
   });
-  
+
   const { data: commandLogs } = useQuery<CommandLog[]>({
-    queryKey: roverId && roverId !== 'all' ? [`/api/rovers/${roverId}/command-logs`] : ['/api/command-logs'],
-    enabled: true,
+    queryKey:
+      roverId && roverId !== null
+        ? [`/api/rovers/${roverId}/command-logs`]
+        : ["/api/command-logs"],
+    enabled: !!roverId, //*true,
     refetchInterval: 2000,
   });
-  
+
   // Scroll to bottom of terminal when logs change
   useEffect(() => {
     if (terminalRef.current) {
       terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
     }
   }, [commandLogs]);
-  
+
   // Update roverId when selectedRoverId changes
   useEffect(() => {
-    if (selectedRoverId) {
-      setRoverId(selectedRoverId.toString());
-    } else {
-      setRoverId("all");
-    }
+    setRoverId(selectedRoverId ?? null);
   }, [selectedRoverId]);
-  
-  const handleSubmit = async () => {
+
+  const handleSubmit = async (e?: React.FormEvent | React.KeyboardEvent) => {
+    e?.preventDefault(); // Prevent default form submission behavior
+
     if (!command.trim()) return;
     if (!roverId) {
       toast({
@@ -56,7 +73,14 @@ const CommandConsole = ({ className, selectedRoverId }: CommandConsoleProps) => 
       });
       return;
     }
-    
+
+    // Prevent double submission using timestamp
+    const now = Date.now();
+    if (lastSubmitRef.current && now - lastSubmitRef.current < 500) {
+      return; // Ignore duplicate submits within 500ms
+    }
+    lastSubmitRef.current = now; // Update last submit time
+
     // Validate command
     const validation = parseCommand(command);
     if (!validation.isValid) {
@@ -67,9 +91,9 @@ const CommandConsole = ({ className, selectedRoverId }: CommandConsoleProps) => 
       });
       return;
     }
-    
+
     try {
-      await sendCommand({ roverId: parseInt(roverId), command });
+      await sendCommand({ roverId, command });
       setCommand("");
     } catch (error) {
       toast({
@@ -79,46 +103,54 @@ const CommandConsole = ({ className, selectedRoverId }: CommandConsoleProps) => 
       });
     }
   };
-  
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+
+  /*const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       handleSubmit();
     }
-  };
-  
+  };*/
+
   // Format log message
   const formatLogMessage = (log: CommandLog) => {
-    const timestamp = new Date(log.timestamp).toLocaleTimeString();
-    
-    if (log.status === 'pending') {
+    const timestamp = log.timestamp
+      ? new Date(log.timestamp).toLocaleTimeString()
+      : "Unknown Time";
+
+    if (log.status === "pending") {
       return `[${timestamp}] Executing: ${log.command}...`;
-    } else if (log.status === 'success') {
+    } else if (log.status === "success") {
       return `[${timestamp}] Success: ${log.response || log.command}`;
     } else {
-      return `[${timestamp}] Failed: ${log.response || 'Unknown error'}`;
+      return `[${timestamp}] Failed: ${log.response || "Unknown error"}`;
     }
   };
-  
+
   // Get log class
   const getLogClass = (status?: string) => {
     switch (status) {
-      case 'pending': return 'log-info';
-      case 'success': return 'log-success';
-      case 'failed': return 'log-error';
-      default: return '';
+      case "pending":
+        return "log-info";
+      case "success":
+        return "log-success";
+      case "failed":
+        return "log-error";
+      default:
+        return "";
     }
   };
-  
+
   return (
     <Card className={className}>
       <CardHeader className="flex flex-row items-center justify-between py-3">
         <CardTitle>Command Console</CardTitle>
-        <Select value={roverId} onValueChange={setRoverId}>
+        <Select
+          value={roverId !== null ? roverId.toString() : undefined}
+          onValueChange={(value) => setRoverId(value ? Number(value) : null)}
+        >
           <SelectTrigger className="w-40">
             <SelectValue placeholder="Select Rover" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Rovers</SelectItem>
             {rovers?.map((rover) => (
               <SelectItem key={rover.id} value={rover.id.toString()}>
                 {rover.name}
@@ -129,40 +161,48 @@ const CommandConsole = ({ className, selectedRoverId }: CommandConsoleProps) => 
       </CardHeader>
       <CardContent>
         <div className="terminal mb-3" ref={terminalRef}>
-          <div className="terminal-line log-info">[System] Connected to server at {window.location.host}</div>
-          
+          <div className="terminal-line log-info">
+            [System] Connected to server at {window.location.host}
+          </div>
+
           {!roverId && (
-            <div className="terminal-line log-warn">[System] Please select a rover to send commands</div>
+            <div className="terminal-line log-warn">
+              [System] Please select a rover to send commands
+            </div>
           )}
-          
+
           {roverId && commandLogs?.length === 0 && (
-            <div className="terminal-line log-info">[System] No command history for this rover</div>
+            <div className="terminal-line log-info">
+              [System] No command history for this rover
+            </div>
           )}
-          
+
           {commandLogs?.map((log) => (
-            <div key={log.id} className={`terminal-line ${getLogClass(log.status)}`}>
+            <div
+              key={log.id}
+              className={`terminal-line ${getLogClass(log.status)}`}
+            >
               {formatLogMessage(log)}
             </div>
           ))}
         </div>
-        <div className="flex">
+        <form onSubmit={handleSubmit} className="flex">
           <Input
             type="text"
             placeholder="Enter command..."
             value={command}
             onChange={(e) => setCommand(e.target.value)}
-            onKeyPress={handleKeyPress}
             className="flex-1 rounded-r-none"
             disabled={!roverId}
           />
-          <Button 
-            onClick={handleSubmit}
+          <Button
+            type="submit"
             className="rounded-l-none"
             disabled={!roverId || !command.trim()}
           >
             Send
           </Button>
-        </div>
+        </form>
       </CardContent>
     </Card>
   );

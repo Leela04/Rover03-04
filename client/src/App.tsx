@@ -11,7 +11,7 @@ import Settings from "@/pages/settings";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 import { WebSocketProvider } from "@/lib/websocket";
-
+import Rovers from "@/pages/rovers";
 function Router() {
   return (
     <div className="flex flex-col h-screen">
@@ -21,7 +21,8 @@ function Router() {
         <main className="flex-1 overflow-y-auto p-6">
           <Switch>
             <Route path="/" component={Dashboard} />
-            <Route path="/rovers/:id" component={RoverDetails} />
+            <Route path="/rovers/:id" component={RoverDetails} />{" "}
+            <Route path="/rovers" component={Rovers} />{" "}
             <Route path="/diagnostics" component={Diagnostics} />
             <Route path="/data-logs" component={DataLogs} />
             <Route path="/settings" component={Settings} />

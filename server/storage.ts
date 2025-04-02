@@ -4,7 +4,7 @@ import {
   sensorData, type SensorData, type InsertSensorData,
   commandLogs, type CommandLog, type InsertCommandLog,
   roverClients, type RoverClient, type InsertRoverClient
-} from "@shared/schema";
+} from "../shared/schema";
 
 // Interface for all storage operations
 export interface IStorage {
@@ -68,23 +68,23 @@ export class MemStorage implements IStorage {
     this.roverClientCurrentId = 1;
     
     // Add some sample rovers
-    this.createRover({
+    /*this.createRover({
       name: "Rover Alpha",
-      identifier: "R-001",
-      ipAddress: "192.168.1.101"
+      identifier: "R_001",
+      ipAddress : "192.168.1.101" 
     });
     
     this.createRover({
       name: "Rover Beta",
-      identifier: "R-002",
+      identifier: "R_002",
       ipAddress: "192.168.1.102"
     });
     
     this.createRover({
       name: "Rover Delta",
-      identifier: "R-004",
+      identifier: "R_004",
       ipAddress: "192.168.1.104"
-    });
+    });*/
   }
 
   // User operations
@@ -129,6 +129,8 @@ export class MemStorage implements IStorage {
       status: "disconnected",
       batteryLevel: 100,
       lastSeen: new Date(),
+      ipAddress: insertRover.ipAddress ?? null, // Handle undefined gracefully
+
       metadata: {}
     };
     this.rovers.set(id, rover);
@@ -152,8 +154,8 @@ export class MemStorage implements IStorage {
   async getSensorDataByRoverId(roverId: number, limit = 100): Promise<SensorData[]> {
     return Array.from(this.sensorDataItems.values())
       .filter(data => data.roverId === roverId)
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-      .slice(0, limit);
+      .sort((a, b) => (b.timestamp?.getTime() ??0) - (a.timestamp?.getTime()?? 0));
+      //.slice(0, limit));
   }
   
   async createSensorData(insertData: InsertSensorData): Promise<SensorData> {
@@ -162,6 +164,7 @@ export class MemStorage implements IStorage {
       ...insertData,
       id,
       timestamp: new Date()
+      
     };
     this.sensorDataItems.set(id, data);
     return data;
@@ -175,16 +178,18 @@ export class MemStorage implements IStorage {
   async getCommandLogsByRoverId(roverId: number, limit = 100): Promise<CommandLog[]> {
     return Array.from(this.commandLogs.values())
       .filter(log => log.roverId === roverId)
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-      .slice(0, limit);
+      .sort((a, b) => (b.timestamp?.getTime() ??0) - (a.timestamp?.getTime()?? 0));
+      //.slice(0, limit);
   }
   
   async createCommandLog(insertLog: InsertCommandLog): Promise<CommandLog> {
     const id = this.commandLogCurrentId++;
+    
+
     const log: CommandLog = {
       ...insertLog,
-      id,
-      timestamp: new Date()
+        id,
+        timestamp: new Date()
     };
     this.commandLogs.set(id, log);
     return log;
@@ -222,11 +227,15 @@ export class MemStorage implements IStorage {
   
   async createRoverClient(insertClient: InsertRoverClient): Promise<RoverClient> {
     const id = this.roverClientCurrentId++;
-    const client: RoverClient = {
+    const client= {
       ...insertClient,
       id,
-      lastPing: new Date()
+      lastPing: new Date(),
+      socketId: insertClient.socketId ?? null, // Handle undefined gracefully
+      connected: insertClient.connected ?? null, // Handle undefined gracefully
+
     };
+
     this.roverClients.set(id, client);
     return client;
   }

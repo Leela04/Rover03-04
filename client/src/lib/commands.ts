@@ -19,7 +19,7 @@ export interface CommandParams {
 
 export interface UseCommandResult {
   sendCommand: (params: CommandParams) => Promise<void>;
-  sendWebSocketCommand: (params: CommandParams) => void;
+  //sendWebSocketCommand: (params: CommandParams) => void;
 }
 
 // Parse and validate command
@@ -98,15 +98,31 @@ export function useCommand(): UseCommandResult {
       if (!validation.isValid) {
         throw new Error(validation.error);
       }
+
+      /*// Conditionally choose WebSocket over API
+      const isWebSocket = true; // You can set this dynamically based on your app context
       
-      await apiRequest('POST', `/api/rovers/${roverId}/command`, { command });
+      if (isWebSocket) {
+        const message: WebSocketMessage = {
+          type: 'COMMAND',
+          roverId,
+          timestamp: Date.now(),
+          payload: { command }
+        };
+        sendMessage(message);
+      } else {
+        // Send command via API if WebSocket is not preferred*/
+
+      
+        await apiRequest('POST', `/api/rovers/${roverId}/command`, { command });
+      
     } catch (error) {
       console.error('Failed to send command:', error);
       throw error;
     }
-  }, []);
+  }, [sendMessage]);
   
-  const sendWebSocketCommand = useCallback(({ roverId, command }: CommandParams) => {
+  /*const sendWebSocketCommand = useCallback(({ roverId, command }: CommandParams) => {
     const validation = parseCommand(command);
     if (!validation.isValid) {
       throw new Error(validation.error);
@@ -115,11 +131,66 @@ export function useCommand(): UseCommandResult {
     const message: WebSocketMessage = {
       type: 'COMMAND',
       roverId,
+      timestamp: Date.now(),
+      payload: { command }
+    };
+    
+    sendMessage(message);
+  }, [sendMessage]);*/
+  
+  return { sendCommand };
+}
+
+/*
+// Hook to send commands via API
+export function useCommand(): UseCommandResult {
+  const { sendMessage } = useWebSocket();
+  
+  const sendCommand = useCallback(async ({ roverId, command }: CommandParams) => {
+    try {
+      const validation = parseCommand(command);
+      if (!validation.isValid) {
+        throw new Error(validation.error);
+      }
+
+      // Conditionally choose WebSocket over API
+      const isWebSocket = true; // You can set this dynamically based on your app context
+      
+      if (isWebSocket) {
+        const message: WebSocketMessage = {
+          type: 'COMMAND',
+          roverId,
+          timestamp: Date.now(),
+          payload: { command }
+        };
+        sendMessage(message);
+      } else {
+        // Send command via API if WebSocket is not preferred
+
+      
+        await apiRequest('POST', `/api/rovers/${roverId}/command`, { command });
+      }
+    } catch (error) {
+      console.error('Failed to send command:', error);
+      throw error;
+    }
+  }, [sendMessage]);
+  
+  /*const sendWebSocketCommand = useCallback(({ roverId, command }: CommandParams) => {
+    const validation = parseCommand(command);
+    if (!validation.isValid) {
+      throw new Error(validation.error);
+    }
+    
+    const message: WebSocketMessage = {
+      type: 'COMMAND',
+      roverId,
+      timestamp: Date.now(),
       payload: { command }
     };
     
     sendMessage(message);
   }, [sendMessage]);
   
-  return { sendCommand, sendWebSocketCommand };
-}
+  return { sendCommand };
+}*/
