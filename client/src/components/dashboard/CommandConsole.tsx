@@ -61,6 +61,32 @@ const CommandConsole = ({
     setRoverId(selectedRoverId ?? null);
   }, [selectedRoverId]);
 
+  useEffect(() => {
+    if (!lastMessage || !lastMessage.payload?.commandId) return;
+
+    console.log("Received WebSocket message:", lastMessage);
+
+    if (!lastMessage.payload.command) {
+      toast({
+        variant: "warning",
+        title: "Invalid Command Received",
+        description: `Unexpected command received: ${JSON.stringify(
+          lastMessage
+        )}`,
+      });
+      return;
+    }
+
+    // Prevent processing the same command twice
+    if (lastMessage.payload.commandId === lastSubmitRef.current) {
+      console.log("Duplicate WebSocket message detected, ignoring.");
+      return;
+    }
+    lastSubmitRef.current = lastMessage.payload.commandId;
+
+    // Handle the command properly
+  }, [lastMessage]);
+
   const handleSubmit = async (e?: React.FormEvent | React.KeyboardEvent) => {
     e?.preventDefault(); // Prevent default form submission behavior
 
@@ -77,6 +103,12 @@ const CommandConsole = ({
     // Prevent double submission using timestamp
     const now = Date.now();
     if (lastSubmitRef.current && now - lastSubmitRef.current < 500) {
+      toast({
+        variant: "warning",
+        title: "Duplicate Command",
+        description: "You are trying to send the same command too quickly.",
+      });
+
       return; // Ignore duplicate submits within 500ms
     }
     lastSubmitRef.current = now; // Update last submit time
@@ -91,10 +123,16 @@ const CommandConsole = ({
       });
       return;
     }
+    console.log("Sending command:", { roverId, command });
 
     try {
       await sendCommand({ roverId, command });
       setCommand("");
+      toast({
+        variant: "success",
+        title: "Command Sent",
+        description: `Command "${command}" was successfully sent to Rover ${roverId}.`,
+      });
     } catch (error) {
       toast({
         variant: "destructive",

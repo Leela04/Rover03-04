@@ -22,6 +22,7 @@ export const rovers = pgTable("rovers", {
   connected: boolean("connected").default(false),
   status: text("status").default("disconnected"), // disconnected, idle, active, error
   batteryLevel: integer("battery_level").default(100),
+  batteryUpdatedAt: timestamp("battery_updated_at"), // <-- New column
   lastSeen: timestamp("last_seen"),
   ipAddress: text("ip_address"),
   metadata: json("metadata")

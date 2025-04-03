@@ -1,16 +1,44 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useWebSocket } from "@/lib/websocket";
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Save, RefreshCw, Trash2, WifiOff, Clock, ArrowUpDown, RotateCw, Server, Shield, Users, Database } from "lucide-react";
+import {
+  Save,
+  RefreshCw,
+  Trash2,
+  WifiOff,
+  Clock,
+  ArrowUpDown,
+  RotateCw,
+  Server,
+  Shield,
+  Users,
+  Database,
+} from "lucide-react";
 
 const Settings = () => {
+  const { connected, lastMessage } = useWebSocket(); // Get WebSocket data
+
   const { toast } = useToast();
 
   const handleSave = () => {
@@ -31,7 +59,9 @@ const Settings = () => {
     <>
       <div className="mb-6">
         <h2 className="text-2xl font-semibold mb-2">Settings</h2>
-        <p className="text-muted-foreground">Configure system and rover settings</p>
+        <p className="text-muted-foreground">
+          Configure system and rover settings
+        </p>
       </div>
 
       <Tabs defaultValue="general">
@@ -47,23 +77,33 @@ const Settings = () => {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle>System Settings</CardTitle>
-              <CardDescription>Configure general system behavior</CardDescription>
+              <CardDescription>
+                Configure general system behavior
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label htmlFor="auto-refresh">Auto-refresh Dashboard</Label>
-                      <p className="text-sm text-muted-foreground">Automatically refresh dashboard data</p>
+                      <Label htmlFor="auto-refresh">
+                        Auto-refresh Dashboard
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Automatically refresh dashboard data
+                      </p>
                     </div>
                     <Switch id="auto-refresh" defaultChecked />
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label htmlFor="notifications">Enable Notifications</Label>
-                      <p className="text-sm text-muted-foreground">Receive alerts about rover status changes</p>
+                      <Label htmlFor="notifications">
+                        Enable Notifications
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Receive alerts about rover status changes
+                      </p>
                     </div>
                     <Switch id="notifications" defaultChecked />
                   </div>
@@ -71,7 +111,9 @@ const Settings = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="dark-mode">Dark Mode</Label>
-                      <p className="text-sm text-muted-foreground">Switch between light and dark theme</p>
+                      <p className="text-sm text-muted-foreground">
+                        Switch between light and dark theme
+                      </p>
                     </div>
                     <Switch id="dark-mode" />
                   </div>
@@ -79,7 +121,9 @@ const Settings = () => {
 
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="refresh-interval">Dashboard Refresh Interval</Label>
+                    <Label htmlFor="refresh-interval">
+                      Dashboard Refresh Interval
+                    </Label>
                     <div className="flex items-center mt-2">
                       <RefreshCw className="h-4 w-4 mr-2 text-muted-foreground" />
                       <Select defaultValue="5000">
@@ -98,7 +142,9 @@ const Settings = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor="data-retention">Data Retention Period</Label>
+                    <Label htmlFor="data-retention">
+                      Data Retention Period
+                    </Label>
                     <div className="flex items-center mt-2">
                       <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
                       <Select defaultValue="7">
@@ -149,11 +195,19 @@ const Settings = () => {
                   <div>
                     <Label htmlFor="theme-color">Accent Color</Label>
                     <div className="flex mt-2 space-x-2">
-                      {['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-red-500', 'bg-yellow-500'].map((color) => (
+                      {[
+                        "bg-blue-500",
+                        "bg-green-500",
+                        "bg-purple-500",
+                        "bg-red-500",
+                        "bg-yellow-500",
+                      ].map((color) => (
                         <button
                           key={color}
                           className={`${color} h-8 w-8 rounded-full border-2 border-white focus:outline-none focus:ring-2 focus:ring-offset-2`}
-                          aria-label={`Select ${color.replace('bg-', '').replace('-500', '')} theme color`}
+                          aria-label={`Select ${color
+                            .replace("bg-", "")
+                            .replace("-500", "")} theme color`}
                         />
                       ))}
                     </div>
@@ -210,13 +264,15 @@ const Settings = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="animations">UI Animations</Label>
-                      <p className="text-sm text-muted-foreground">Enable animated transitions</p>
+                      <p className="text-sm text-muted-foreground">
+                        Enable animated transitions
+                      </p>
                     </div>
                     <Switch id="animations" defaultChecked />
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex justify-end space-x-2 pt-4">
                 <Button variant="outline" onClick={handleResetDefaults}>
                   Reset to Defaults
@@ -234,13 +290,17 @@ const Settings = () => {
           <Card>
             <CardHeader>
               <CardTitle>Rover Configuration</CardTitle>
-              <CardDescription>Configure default settings for rovers</CardDescription>
+              <CardDescription>
+                Configure default settings for rovers
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="default-speed">Default Movement Speed</Label>
+                    <Label htmlFor="default-speed">
+                      Default Movement Speed
+                    </Label>
                     <div className="pt-2">
                       <Slider defaultValue={[50]} min={0} max={100} step={5} />
                       <div className="flex justify-between text-xs text-muted-foreground mt-1">
@@ -251,7 +311,9 @@ const Settings = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor="telemetry-rate">Telemetry Update Rate (ms)</Label>
+                    <Label htmlFor="telemetry-rate">
+                      Telemetry Update Rate (ms)
+                    </Label>
                     <div className="flex items-center mt-2">
                       <RotateCw className="h-4 w-4 mr-2 text-muted-foreground" />
                       <Select defaultValue="2000">
@@ -261,8 +323,12 @@ const Settings = () => {
                         <SelectContent>
                           <SelectItem value="500">500 ms (Fast)</SelectItem>
                           <SelectItem value="1000">1000 ms (Normal)</SelectItem>
-                          <SelectItem value="2000">2000 ms (Default)</SelectItem>
-                          <SelectItem value="5000">5000 ms (Low Bandwidth)</SelectItem>
+                          <SelectItem value="2000">
+                            2000 ms (Default)
+                          </SelectItem>
+                          <SelectItem value="5000">
+                            5000 ms (Low Bandwidth)
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -271,15 +337,21 @@ const Settings = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="auto-connect">Auto-connect Rovers</Label>
-                      <p className="text-sm text-muted-foreground">Automatically connect to detected rovers</p>
+                      <p className="text-sm text-muted-foreground">
+                        Automatically connect to detected rovers
+                      </p>
                     </div>
                     <Switch id="auto-connect" defaultChecked />
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label htmlFor="emergency-stop">Emergency Stop Button</Label>
-                      <p className="text-sm text-muted-foreground">Show emergency stop button on all control panels</p>
+                      <Label htmlFor="emergency-stop">
+                        Emergency Stop Button
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Show emergency stop button on all control panels
+                      </p>
                     </div>
                     <Switch id="emergency-stop" defaultChecked />
                   </div>
@@ -287,7 +359,9 @@ const Settings = () => {
 
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="camera-quality">Default Camera Quality</Label>
+                    <Label htmlFor="camera-quality">
+                      Default Camera Quality
+                    </Label>
                     <div className="flex items-center mt-2">
                       <Select defaultValue="medium">
                         <SelectTrigger>
@@ -303,7 +377,9 @@ const Settings = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor="battery-warning">Low Battery Warning Threshold</Label>
+                    <Label htmlFor="battery-warning">
+                      Low Battery Warning Threshold
+                    </Label>
                     <div className="pt-2">
                       <Slider defaultValue={[20]} min={5} max={50} step={5} />
                       <div className="flex justify-between text-xs text-muted-foreground mt-1">
@@ -315,7 +391,9 @@ const Settings = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor="default-camera">Default Active Camera</Label>
+                    <Label htmlFor="default-camera">
+                      Default Active Camera
+                    </Label>
                     <div className="flex items-center mt-2">
                       <Select defaultValue="front">
                         <SelectTrigger>
@@ -324,7 +402,9 @@ const Settings = () => {
                         <SelectContent>
                           <SelectItem value="front">Front Camera</SelectItem>
                           <SelectItem value="rear">Rear Camera</SelectItem>
-                          <SelectItem value="instrument">Instrument Camera</SelectItem>
+                          <SelectItem value="instrument">
+                            Instrument Camera
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -332,8 +412,12 @@ const Settings = () => {
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label htmlFor="lights-on-startup">Lights On By Default</Label>
-                      <p className="text-sm text-muted-foreground">Enable lights when rover is connected</p>
+                      <Label htmlFor="lights-on-startup">
+                        Lights On By Default
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Enable lights when rover is connected
+                      </p>
                     </div>
                     <Switch id="lights-on-startup" />
                   </div>
@@ -341,15 +425,21 @@ const Settings = () => {
               </div>
 
               <div className="pt-6 border-t">
-                <h3 className="text-lg font-medium mb-4">Rover Command Macros</h3>
+                <h3 className="text-lg font-medium mb-4">
+                  Rover Command Macros
+                </h3>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <div>
                       <p className="font-medium">Patrol Mode</p>
-                      <p className="text-sm text-muted-foreground">move forward 5m, wait 5s, rotate 90°, repeat</p>
+                      <p className="text-sm text-muted-foreground">
+                        move forward 5m, wait 5s, rotate 90°, repeat
+                      </p>
                     </div>
                     <div className="flex space-x-2">
-                      <Button variant="outline" size="sm">Edit</Button>
+                      <Button variant="outline" size="sm">
+                        Edit
+                      </Button>
                       <Button variant="destructive" size="sm">
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -359,10 +449,14 @@ const Settings = () => {
                   <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <div>
                       <p className="font-medium">Return Home</p>
-                      <p className="text-sm text-muted-foreground">navigate to origin coordinates</p>
+                      <p className="text-sm text-muted-foreground">
+                        navigate to origin coordinates
+                      </p>
                     </div>
                     <div className="flex space-x-2">
-                      <Button variant="outline" size="sm">Edit</Button>
+                      <Button variant="outline" size="sm">
+                        Edit
+                      </Button>
                       <Button variant="destructive" size="sm">
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -374,7 +468,7 @@ const Settings = () => {
                   </Button>
                 </div>
               </div>
-              
+
               <div className="flex justify-end space-x-2 pt-4">
                 <Button variant="outline" onClick={handleResetDefaults}>
                   Reset to Defaults
@@ -392,7 +486,9 @@ const Settings = () => {
           <Card>
             <CardHeader>
               <CardTitle>Network Settings</CardTitle>
-              <CardDescription>Configure network and connectivity options</CardDescription>
+              <CardDescription>
+                Configure network and connectivity options
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -401,19 +497,28 @@ const Settings = () => {
                     <Label htmlFor="server-address">Server Address</Label>
                     <div className="flex items-center mt-2">
                       <Server className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <Input id="server-address" defaultValue={window.location.hostname} />
+                      <Input
+                        id="server-address"
+                        defaultValue={window.location.hostname}
+                      />
                     </div>
                   </div>
 
                   <div>
                     <Label htmlFor="server-port">WebSocket Port</Label>
                     <div className="flex items-center mt-2">
-                      <Input id="server-port" defaultValue="5000" type="number" />
+                      <Input
+                        id="server-port"
+                        defaultValue="5000"
+                        type="number"
+                      />
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="reconnect-attempts">Reconnection Attempts</Label>
+                    <Label htmlFor="reconnect-attempts">
+                      Reconnection Attempts
+                    </Label>
                     <div className="flex items-center mt-2">
                       <WifiOff className="h-4 w-4 mr-2 text-muted-foreground" />
                       <Select defaultValue="5">
@@ -432,9 +537,15 @@ const Settings = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor="connection-timeout">Connection Timeout (ms)</Label>
+                    <Label htmlFor="connection-timeout">
+                      Connection Timeout (ms)
+                    </Label>
                     <div className="flex items-center mt-2">
-                      <Input id="connection-timeout" defaultValue="30000" type="number" />
+                      <Input
+                        id="connection-timeout"
+                        defaultValue="30000"
+                        type="number"
+                      />
                     </div>
                   </div>
                 </div>
@@ -443,7 +554,9 @@ const Settings = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="auto-reconnect">Auto Reconnect</Label>
-                      <p className="text-sm text-muted-foreground">Automatically attempt to reconnect when disconnected</p>
+                      <p className="text-sm text-muted-foreground">
+                        Automatically attempt to reconnect when disconnected
+                      </p>
                     </div>
                     <Switch id="auto-reconnect" defaultChecked />
                   </div>
@@ -451,7 +564,9 @@ const Settings = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="compress-data">Compress Data</Label>
-                      <p className="text-sm text-muted-foreground">Compress data transmissions to reduce bandwidth</p>
+                      <p className="text-sm text-muted-foreground">
+                        Compress data transmissions to reduce bandwidth
+                      </p>
                     </div>
                     <Switch id="compress-data" defaultChecked />
                   </div>
@@ -459,48 +574,71 @@ const Settings = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="use-ssl">Use SSL/TLS</Label>
-                      <p className="text-sm text-muted-foreground">Secure connections with SSL/TLS</p>
+                      <p className="text-sm text-muted-foreground">
+                        Secure connections with SSL/TLS
+                      </p>
                     </div>
-                    <Switch id="use-ssl" defaultChecked={window.location.protocol === 'https:'} />
+                    <Switch
+                      id="use-ssl"
+                      defaultChecked={window.location.protocol === "https:"}
+                    />
                   </div>
 
                   <div>
                     <Label htmlFor="ping-interval">Ping Interval (ms)</Label>
                     <div className="flex items-center mt-2">
-                      <Input id="ping-interval" defaultValue="10000" type="number" />
+                      <Input
+                        id="ping-interval"
+                        defaultValue="10000"
+                        type="number"
+                      />
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="pt-6 border-t">
-                <h3 className="text-lg font-medium mb-4">Network Diagnostics</h3>
+                <h3 className="text-lg font-medium mb-4">
+                  Network Diagnostics
+                </h3>
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <div className="text-sm text-muted-foreground">WebSocket Status</div>
+                      <div className="text-sm text-muted-foreground">
+                        WebSocket Status
+                      </div>
                       <div className="flex items-center">
-                        <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500 mr-2"></span>
-                        <span>Connected</span>
+                        <span
+                          className={`inline-block w-2.5 h-2.5 rounded-full  mr-2 ${
+                            connected ? "bg-green-500" : "bg-red-500"
+                          }`}
+                        ></span>
+                        <span>{connected ? "Connected" : "Disconnected"}</span>
                       </div>
                     </div>
-                    
+
                     <div>
-                      <div className="text-sm text-muted-foreground">Connection Latency</div>
+                      <div className="text-sm text-muted-foreground">
+                        Connection Latency
+                      </div>
                       <div>45 ms</div>
                     </div>
-                    
+
                     <div>
-                      <div className="text-sm text-muted-foreground">Connected Clients</div>
+                      <div className="text-sm text-muted-foreground">
+                        Connected Clients
+                      </div>
                       <div>4</div>
                     </div>
-                    
+
                     <div>
-                      <div className="text-sm text-muted-foreground">Data Transfer Rate</div>
+                      <div className="text-sm text-muted-foreground">
+                        Data Transfer Rate
+                      </div>
                       <div>2.4 KB/s</div>
                     </div>
                   </div>
-                  
+
                   <div className="mt-4 flex space-x-2">
                     <Button variant="outline" size="sm">
                       <RefreshCw className="mr-2 h-4 w-4" />
@@ -512,7 +650,7 @@ const Settings = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex justify-end space-x-2 pt-4">
                 <Button variant="outline" onClick={handleResetDefaults}>
                   Reset to Defaults
@@ -530,13 +668,17 @@ const Settings = () => {
           <Card>
             <CardHeader>
               <CardTitle>Security Settings</CardTitle>
-              <CardDescription>Configure authentication and permissions</CardDescription>
+              <CardDescription>
+                Configure authentication and permissions
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="authentication-method">Authentication Method</Label>
+                    <Label htmlFor="authentication-method">
+                      Authentication Method
+                    </Label>
                     <div className="flex items-center mt-2">
                       <Shield className="h-4 w-4 mr-2 text-muted-foreground" />
                       <Select defaultValue="token">
@@ -544,7 +686,9 @@ const Settings = () => {
                           <SelectValue placeholder="Select method" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="basic">Basic Authentication</SelectItem>
+                          <SelectItem value="basic">
+                            Basic Authentication
+                          </SelectItem>
                           <SelectItem value="token">Token-based</SelectItem>
                           <SelectItem value="oauth">OAuth 2.0</SelectItem>
                         </SelectContent>
@@ -555,7 +699,11 @@ const Settings = () => {
                   <div>
                     <Label htmlFor="access-token">Access Token</Label>
                     <div className="flex items-center mt-2">
-                      <Input id="access-token" defaultValue="****************************************" type="password" />
+                      <Input
+                        id="access-token"
+                        defaultValue="****************************************"
+                        type="password"
+                      />
                       <Button variant="outline" className="ml-2">
                         Regenerate
                       </Button>
@@ -565,7 +713,9 @@ const Settings = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="rover-auth">Rover Authentication</Label>
-                      <p className="text-sm text-muted-foreground">Require authentication for rover connections</p>
+                      <p className="text-sm text-muted-foreground">
+                        Require authentication for rover connections
+                      </p>
                     </div>
                     <Switch id="rover-auth" defaultChecked />
                   </div>
@@ -573,7 +723,9 @@ const Settings = () => {
 
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="session-timeout">Session Timeout (minutes)</Label>
+                    <Label htmlFor="session-timeout">
+                      Session Timeout (minutes)
+                    </Label>
                     <div className="flex items-center mt-2">
                       <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
                       <Select defaultValue="30">
@@ -594,15 +746,21 @@ const Settings = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="activity-log">Activity Logging</Label>
-                      <p className="text-sm text-muted-foreground">Log all rover commands and activities</p>
+                      <p className="text-sm text-muted-foreground">
+                        Log all rover commands and activities
+                      </p>
                     </div>
                     <Switch id="activity-log" defaultChecked />
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label htmlFor="command-confirmation">Command Confirmation</Label>
-                      <p className="text-sm text-muted-foreground">Require confirmation for critical commands</p>
+                      <Label htmlFor="command-confirmation">
+                        Command Confirmation
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Require confirmation for critical commands
+                      </p>
                     </div>
                     <Switch id="command-confirmation" />
                   </div>
@@ -624,10 +782,14 @@ const Settings = () => {
                   <div className="p-2">
                     <div className="flex justify-between items-center p-2 hover:bg-gray-50 rounded-md">
                       <div className="flex items-center">
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">A</div>
+                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+                          A
+                        </div>
                         <div className="ml-3">
                           <div className="font-medium">Admin User</div>
-                          <div className="text-xs text-muted-foreground">admin@example.com</div>
+                          <div className="text-xs text-muted-foreground">
+                            admin@example.com
+                          </div>
                         </div>
                       </div>
                       <div className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full">
@@ -636,10 +798,14 @@ const Settings = () => {
                     </div>
                     <div className="flex justify-between items-center p-2 hover:bg-gray-50 rounded-md">
                       <div className="flex items-center">
-                        <div className="h-8 w-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary font-medium">O</div>
+                        <div className="h-8 w-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary font-medium">
+                          O
+                        </div>
                         <div className="ml-3">
                           <div className="font-medium">Operator</div>
-                          <div className="text-xs text-muted-foreground">operator@example.com</div>
+                          <div className="text-xs text-muted-foreground">
+                            operator@example.com
+                          </div>
                         </div>
                       </div>
                       <div className="text-xs px-2 py-1 bg-secondary/10 text-secondary rounded-full">
@@ -648,10 +814,14 @@ const Settings = () => {
                     </div>
                     <div className="flex justify-between items-center p-2 hover:bg-gray-50 rounded-md">
                       <div className="flex items-center">
-                        <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-medium">V</div>
+                        <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-medium">
+                          V
+                        </div>
                         <div className="ml-3">
                           <div className="font-medium">Viewer</div>
-                          <div className="text-xs text-muted-foreground">viewer@example.com</div>
+                          <div className="text-xs text-muted-foreground">
+                            viewer@example.com
+                          </div>
                         </div>
                       </div>
                       <div className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
@@ -661,7 +831,7 @@ const Settings = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex justify-end space-x-2 pt-4">
                 <Button variant="outline" onClick={handleResetDefaults}>
                   Reset to Defaults
@@ -679,7 +849,9 @@ const Settings = () => {
           <Card>
             <CardHeader>
               <CardTitle>Advanced Settings</CardTitle>
-              <CardDescription>Configure advanced system parameters</CardDescription>
+              <CardDescription>
+                Configure advanced system parameters
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -704,16 +876,24 @@ const Settings = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor="max-connections">Maximum Concurrent Connections</Label>
+                    <Label htmlFor="max-connections">
+                      Maximum Concurrent Connections
+                    </Label>
                     <div className="flex items-center mt-2">
-                      <Input id="max-connections" defaultValue="10" type="number" />
+                      <Input
+                        id="max-connections"
+                        defaultValue="10"
+                        type="number"
+                      />
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="debug-mode">Debug Mode</Label>
-                      <p className="text-sm text-muted-foreground">Enable additional debugging information</p>
+                      <p className="text-sm text-muted-foreground">
+                        Enable additional debugging information
+                      </p>
                     </div>
                     <Switch id="debug-mode" />
                   </div>
@@ -723,21 +903,35 @@ const Settings = () => {
                   <div>
                     <Label htmlFor="buffer-size">Sensor Data Buffer Size</Label>
                     <div className="flex items-center mt-2">
-                      <Input id="buffer-size" defaultValue="100" type="number" />
+                      <Input
+                        id="buffer-size"
+                        defaultValue="100"
+                        type="number"
+                      />
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="command-timeout">Command Execution Timeout (ms)</Label>
+                    <Label htmlFor="command-timeout">
+                      Command Execution Timeout (ms)
+                    </Label>
                     <div className="flex items-center mt-2">
-                      <Input id="command-timeout" defaultValue="5000" type="number" />
+                      <Input
+                        id="command-timeout"
+                        defaultValue="5000"
+                        type="number"
+                      />
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label htmlFor="performance-mode">High Performance Mode</Label>
-                      <p className="text-sm text-muted-foreground">Optimize for performance (uses more resources)</p>
+                      <Label htmlFor="performance-mode">
+                        High Performance Mode
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Optimize for performance (uses more resources)
+                      </p>
                     </div>
                     <Switch id="performance-mode" />
                   </div>
@@ -749,7 +943,9 @@ const Settings = () => {
                 <div className="space-y-4">
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h4 className="font-medium mb-2">Data Management</h4>
-                    <p className="text-sm text-muted-foreground mb-4">Manage system data and logs</p>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Manage system data and logs
+                    </p>
                     <div className="flex space-x-2">
                       <Button variant="outline">
                         <Database className="mr-2 h-4 w-4" />
@@ -764,20 +960,22 @@ const Settings = () => {
 
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h4 className="font-medium mb-2">System Diagnostics</h4>
-                    <p className="text-sm text-muted-foreground mb-4">Run system diagnostics and troubleshooting tools</p>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Run system diagnostics and troubleshooting tools
+                    </p>
                     <div className="flex space-x-2">
-                      <Button variant="outline">
-                        Run Connection Test
-                      </Button>
-                      <Button variant="outline">
-                        Check System Health
-                      </Button>
+                      <Button variant="outline">Run Connection Test</Button>
+                      <Button variant="outline">Check System Health</Button>
                     </div>
                   </div>
 
                   <div className="bg-destructive/10 p-4 rounded-lg border border-destructive/20">
-                    <h4 className="font-medium text-destructive mb-2">Danger Zone</h4>
-                    <p className="text-sm text-muted-foreground mb-4">These actions cannot be undone</p>
+                    <h4 className="font-medium text-destructive mb-2">
+                      Danger Zone
+                    </h4>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      These actions cannot be undone
+                    </p>
                     <div className="flex space-x-2">
                       <Button variant="destructive">
                         <Trash2 className="mr-2 h-4 w-4" />
@@ -791,7 +989,7 @@ const Settings = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex justify-end space-x-2 pt-4">
                 <Button variant="outline" onClick={handleResetDefaults}>
                   Reset to Defaults

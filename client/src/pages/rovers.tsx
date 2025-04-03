@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Stats from "@/components/dashboard/Stats";
-import RoverList from "@/components/dashboard/RoverList";
+import RoverList from "@/components/rovers/RoverList";
 import CommandConsole from "@/components/dashboard/CommandConsole";
 import RoverControl from "@/components/dashboard/RoverControl";
 import SensorDataDisplay from "@/components/dashboard/SensorData";
@@ -19,7 +19,7 @@ const Rovers = () => {
         </p>
       </div>
 
-      <Stats />
+      {/*<Stats />*/}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="col-span-1">

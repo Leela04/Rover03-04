@@ -31,6 +31,8 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = (props) => {
 
 
   const connectWebSocket = useCallback(() => {
+    if (socket) return; // Prevent multiple connections
+
     try {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const wsUrl = `${protocol}//${window.location.host}/ws`;
@@ -44,63 +46,66 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = (props) => {
           title: 'Connected to server',
           description: 'Real-time updates are now active',
         });
-      };
       
-      ws.onmessage = (event) => {
-        try {
-          const message = JSON.parse(event.data) as WebSocketMessage;
-          setLastMessage(message);
+      
+        ws.onmessage = (event) => {
+          try {
+            const message = JSON.parse(event.data) as WebSocketMessage;
+            setLastMessage((prev) => 
+              prev?.timestamp === message.timestamp ? prev : message
+            );
           
           // Handle specific message types
-          switch (message.type) {
-            case 'STATUS_UPDATE':
-              // Invalidate rover queries to get updated data
-              if (message.roverId) {
-                queryClient.invalidateQueries({ queryKey: [`/api/rovers/${message.roverId}`] });
-              }
-              queryClient.invalidateQueries({ queryKey: ['/api/rovers'] });
-              queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
-              break;
+            switch (message.type) {
+              case 'STATUS_UPDATE':
+                // Invalidate rover queries to get updated data
+                if (message.roverId) {
+                  queryClient.invalidateQueries({ queryKey: [`/api/rovers/${message.roverId}`] });
+                }
+                queryClient.invalidateQueries({ queryKey: ['/api/rovers'] });
+                queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
+                break;
               
-            case 'TELEMETRY':
+              case 'TELEMETRY':
               // Invalidate sensor data queries
-              if (message.roverId) {
-                queryClient.invalidateQueries({ 
-                  queryKey: [`/api/rovers/${message.roverId}/sensor-data`] 
-                });
-              }
-              break;
+                if (message.roverId) {
+                  queryClient.invalidateQueries({ 
+                    queryKey: [`/api/rovers/${message.roverId}/sensor-data`] 
+                  });
+                }
+                break;
               
-            case 'COMMAND':
+              /*case 'COMMAND':
               // Invalidate command logs
-              if (message.roverId) {
-                queryClient.invalidateQueries({ 
-                  queryKey: [`/api/rovers/${message.roverId}/command-logs`] 
-                });
-              }
-              break;
+                if (message.roverId) {
+                  queryClient.invalidateQueries({ 
+                    queryKey: [`/api/rovers/${message.roverId}/command-logs`] 
+                  });
+                }
+                break;*/
 
-            case "COMMAND_RESPONSE":
-              if(message.roverId){
-                queryClient.invalidateQueries({
-                  queryKey:[`/api/rovers/${message.roverId}/command-logs`]
-                });
-              }
-              break;
+              case "COMMAND_RESPONSE":
+                if(message.roverId){
+                  queryClient.invalidateQueries({
+                    queryKey:[`/api/rovers/${message.roverId}/command-logs`]
+                  });
+                }
+                break;
               
           
               
-            case 'ERROR':
-              toast({
-                variant: "destructive",
-                title: "Error",
-                description: message.payload?.message || "An unknown error occurred",
-              });
-              break;
+              case 'ERROR':
+                toast({
+                  variant: "destructive",
+                  title: "Error",
+                  description: message.payload?.message || "An unknown error occurred",
+                });
+                break;
+            }
+          } catch (error) {
+            console.error('Error parsing WebSocket message:', error);
           }
-        } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
-        }
+        };
       };
       
       ws.onclose = () => {
@@ -108,26 +113,26 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = (props) => {
         setConnected(false);
         
         // Try to reconnect after delay
-        //setTimeout(() => {
-          //if (document.visibilityState !== 'hidden') {
-           // connectWebSocket();
-          //}
-        //}, 3000);
+        setTimeout(() => {
+          if (!connected) {
+          connectWebSocket();
+          }
+        }, 3000);
         
-        /*toast({
+        toast({
          variant: "destructive",
           title: "Disconnected from server",
           description: "Attempting to reconnect...",
         });
         const retryDelay = Math.min(10000 * (2 ** reconnectAttempts), 60000); // Exponential backoff (max 1 min)
-        reconnectAttempts++;*/
+        reconnectAttempts++;
       
 
-        setTimeout(() => {
+        /*setTimeout(() => {
           if (document.visibilityState !== 'hidden') {
             connectWebSocket();
           }
-        }, retryDelay);
+        }, retryDelay);*/
 
       };
       
@@ -151,7 +156,11 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = (props) => {
   }, []);//* [toast]);
   
   useEffect(() => {
-    connectWebSocket();
+    if (!socket) {
+      connectWebSocket();
+    }
+  
+    //connectWebSocket();
     
     // Reconnect when tab becomes visible
     const handleVisibilityChange = () => {
@@ -160,15 +169,13 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = (props) => {
       }
     };
     
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    //document.addEventListener('visibilitychange', handleVisibilityChange);
     
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      //if (socket) {
-        //socket.close();
-      //}
+      
     };
-  }, [connectWebSocket, connected, socket]);
+  }, [connectWebSocket ]);//, connected, socket]);*/
   
   const sendMessage = useCallback((message: WebSocketMessage) => {
     if (socket && socket.readyState === WebSocket.OPEN) {

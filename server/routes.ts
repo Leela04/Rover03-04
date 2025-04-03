@@ -562,10 +562,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const connectedRovers = rovers.filter(rover => rover.connected);
       
       const stats = {
-        totalRovers: rovers.length,
-        connectedRovers: connectedRovers.length,
+        //registeredRovers: rovers.length,
+        //enabledRovers: rovers.filter(rover => rover.lastSeen !==null).length, // Planned to use
         activeRovers: rovers.filter(rover => rover.status === 'active').length,
+        inactiveRovers: rovers.filter(rover => rover.status === 'inactive').length,
         errorRovers: rovers.filter(rover => rover.status === 'error').length
+        //systemLogs: await storage.getSystemLogsCount(), // Count of system logs
+
       };
       
       res.json(stats);

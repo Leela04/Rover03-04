@@ -6,9 +6,7 @@ import RoverControl from "@/components/dashboard/RoverControl";
 import SensorDataDisplay from "@/components/dashboard/SensorData";
 
 const Dashboard = () => {
-  const [selectedRoverId, setSelectedRoverId] = useState<number | undefined>(
-    undefined
-  );
+  const [selectedRoverId, setSelectedRoverId] = useState<number | undefined>();
 
   return (
     <>
@@ -21,17 +19,17 @@ const Dashboard = () => {
 
       <Stats />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/*<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
           <RoverList
             className="mb-6"
             onSelectRover={(roverId) => setSelectedRoverId(Number(roverId))}
           />
         </div>
-        <div>
+        {/*<div>
           <CommandConsole selectedRoverId={selectedRoverId} />
         </div>
-      </div>
+      </div>*/}
     </>
   );
 };

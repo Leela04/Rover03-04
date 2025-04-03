@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
@@ -61,12 +61,13 @@ const RoverList = ({ className, onSelectRover }: RoverListProps) => {
     queryKey: ["/api/rovers"],
     refetchInterval: 5000,
   });
+  const [selectedRover, setSelectedRover] = useState<number | null>(null);
 
   if (isLoading) {
     return (
       <Card className={className}>
         <CardHeader>
-          <CardTitle>Connected Rovers</CardTitle>
+          <CardTitle> Rover Details</CardTitle>
         </CardHeader>
         <CardContent>
           {[...Array(3)].map((_, idx) => (
@@ -82,7 +83,7 @@ const RoverList = ({ className, onSelectRover }: RoverListProps) => {
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle>Connected Rovers</CardTitle>
+        <CardTitle>Rover Details</CardTitle>
       </CardHeader>
       <CardContent>
         {rovers && rovers.length > 0 ? (
@@ -90,7 +91,12 @@ const RoverList = ({ className, onSelectRover }: RoverListProps) => {
             {rovers.map((rover) => (
               <div
                 key={rover.id}
-                className="bg-gray-50 rounded-lg p-3 mb-3 border border-gray-200"
+                className={`p-3 border rounded-lg cursor-pointer ${
+                  selectedRover === rover.id ? "bg-blue-200" : "bg-gray-50"
+                }`}
+                onClick={() =>
+                  setSelectedRover(selectedRover === rover.id ? null : rover.id)
+                }
               >
                 <div className="flex justify-between items-center mb-2">
                   <div className="flex items-center">
@@ -119,7 +125,7 @@ const RoverList = ({ className, onSelectRover }: RoverListProps) => {
                     Battery: <span>{rover.batteryLevel}%</span>
                   </div>
                 </div>
-                <div className="mt-3 flex space-x-2">
+                {/*<div className="mt-3 flex space-x-2">
                   <Button
                     variant="default"
                     size="sm"
@@ -132,7 +138,7 @@ const RoverList = ({ className, onSelectRover }: RoverListProps) => {
                       View Details
                     </Button>
                   </Link>
-                </div>
+                </div>*/}
               </div>
             ))}
             {rovers.length > 3 && (
