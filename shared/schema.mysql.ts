@@ -1,10 +1,10 @@
-import { pgTable, varchar, integer, boolean, timestamp, jsonb, doublePrecision, text, serial } from "drizzle-orm/pg-core";
+import { mysqlTable, varchar, int, boolean, timestamp, json, float, text } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // User schema remains for authentication
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+export const users = mysqlTable("users", {
+  id: int("id").primaryKey().autoincrement(),
   username: varchar("username", { length: 100 }).notNull().unique(),
   password: varchar("password", { length: 255 }).notNull(),
 });
@@ -15,8 +15,8 @@ export const insertUserSchema = createInsertSchema(users).pick({
 });
 
 // Customer schema for companies who own rovers
-export const customers = pgTable("customers", {
-  id: serial("id").primaryKey(),
+export const customers = mysqlTable("customers", {
+  id: int("id").primaryKey().autoincrement(),
   companyName: varchar("company_name", { length: 100 }).notNull(),
   location: varchar("location", { length: 255 }).notNull(),
   contactPerson: varchar("contact_person", { length: 100 }),
@@ -35,11 +35,11 @@ export const insertCustomerSchema = createInsertSchema(customers).pick({
 });
 
 // Matrix table to manage rover assignment to customers
-export const roverCustomerMatrix = pgTable("rover_customer_matrix", {
-  id: serial("id").primaryKey(),
+export const roverCustomerMatrix = mysqlTable("rover_customer_matrix", {
+  id: int("id").primaryKey().autoincrement(),
   roverId: varchar("rover_id", { length: 20 }).notNull().unique(), // e.g., R_001, R_002
   roverName: varchar("rover_name", { length: 100 }).notNull(),
-  customerId: integer("customer_id").notNull(),
+  customerId: int("customer_id").notNull(),
   assignmentDate: timestamp("assignment_date").defaultNow(),
   isActive: boolean("is_active").default(true),
 });
@@ -52,22 +52,22 @@ export const insertRoverCustomerMatrixSchema = createInsertSchema(roverCustomerM
 });
 
 // Rover details schema (expanded from previous version)
-export const rovers = pgTable("rovers", {
-  id: serial("id").primaryKey(),
-  matrixId: integer("matrix_id").notNull(), // References the roverCustomerMatrix table
+export const rovers = mysqlTable("rovers", {
+  id: int("id").primaryKey().autoincrement(),
+  matrixId: int("matrix_id").notNull(), // References the roverCustomerMatrix table
   name: varchar("name", { length: 100 }).notNull(),
   identifier: varchar("identifier", { length: 20 }).notNull().unique(),
   connected: boolean("connected").default(false),
   status: varchar("status", { length: 20 }).default("disconnected"), // disconnected, idle, active, error
-  batteryLevel: integer("battery_level").default(100),
+  batteryLevel: int("battery_level").default(100),
   lastSeen: timestamp("last_seen"),
-  currentLatitude: doublePrecision("current_latitude"),
-  currentLongitude: doublePrecision("current_longitude"),
-  currentAltitude: doublePrecision("current_altitude"),
-  totalDistanceTraveled: doublePrecision("total_distance_traveled").default(0),
-  totalTrips: integer("total_trips").default(0),
+  currentLatitude: float("current_latitude"),
+  currentLongitude: float("current_longitude"),
+  currentAltitude: float("current_altitude"),
+  totalDistanceTraveled: float("total_distance_traveled").default(0),
+  totalTrips: int("total_trips").default(0),
   ipAddress: varchar("ip_address", { length: 50 }),
-  metadata: jsonb("metadata"),
+  metadata: json("metadata"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow()
 });
@@ -80,18 +80,18 @@ export const insertRoverSchema = createInsertSchema(rovers).pick({
 });
 
 // Trip data for tracking rover journeys
-export const trips = pgTable("trips", {
-  id: serial("id").primaryKey(),
-  roverId: integer("rover_id").notNull(),
+export const trips = mysqlTable("trips", {
+  id: int("id").primaryKey().autoincrement(),
+  roverId: int("rover_id").notNull(),
   startTime: timestamp("start_time").defaultNow(),
   endTime: timestamp("end_time"),
-  startLatitude: doublePrecision("start_latitude"),
-  startLongitude: doublePrecision("start_longitude"),
-  endLatitude: doublePrecision("end_latitude"),
-  endLongitude: doublePrecision("end_longitude"),
-  distanceTraveled: doublePrecision("distance_traveled").default(0),
-  avgSpeed: doublePrecision("avg_speed"),
-  maxSpeed: doublePrecision("max_speed"),
+  startLatitude: float("start_latitude"),
+  startLongitude: float("start_longitude"),
+  endLatitude: float("end_latitude"),
+  endLongitude: float("end_longitude"),
+  distanceTraveled: float("distance_traveled").default(0),
+  avgSpeed: float("avg_speed"),
+  maxSpeed: float("max_speed"),
   status: varchar("status", { length: 20 }).default("in_progress"), // in_progress, completed, aborted
   notes: text("notes"),
 });
@@ -106,22 +106,22 @@ export const insertTripSchema = createInsertSchema(trips).pick({
 });
 
 // Sensor Data schema
-export const sensorData = pgTable("sensor_data", {
-  id: serial("id").primaryKey(),
-  roverId: integer("rover_id").notNull(),
+export const sensorData = mysqlTable("sensor_data", {
+  id: int("id").primaryKey().autoincrement(),
+  roverId: int("rover_id").notNull(),
   timestamp: timestamp("timestamp").defaultNow(),
-  temperature: doublePrecision("temperature"),
-  humidity: doublePrecision("humidity"),
-  pressure: doublePrecision("pressure"),
-  altitude: doublePrecision("altitude"),
-  heading: doublePrecision("heading"),
-  speed: doublePrecision("speed"),
-  tilt: doublePrecision("tilt"),
-  latitude: doublePrecision("latitude"),
-  longitude: doublePrecision("longitude"),
-  batteryLevel: integer("battery_level"),
-  signalStrength: integer("signal_strength"),
-  tripId: integer("trip_id")
+  temperature: float("temperature"),
+  humidity: float("humidity"),
+  pressure: float("pressure"),
+  altitude: float("altitude"),
+  heading: float("heading"),
+  speed: float("speed"),
+  tilt: float("tilt"),
+  latitude: float("latitude"),
+  longitude: float("longitude"),
+  batteryLevel: int("battery_level"),
+  signalStrength: int("signal_strength"),
+  tripId: int("trip_id")
 });
 
 export const insertSensorDataSchema = createInsertSchema(sensorData).pick({
@@ -142,15 +142,15 @@ export const insertSensorDataSchema = createInsertSchema(sensorData).pick({
 });
 
 // Command Log schema
-export const commandLogs = pgTable("command_logs", {
-  id: serial("id").primaryKey(),
-  roverId: integer("rover_id").notNull(),
+export const commandLogs = mysqlTable("command_logs", {
+  id: int("id").primaryKey().autoincrement(),
+  roverId: int("rover_id").notNull(),
   command: varchar("command", { length: 255 }).notNull(),
   timestamp: timestamp("timestamp").defaultNow(),
   status: varchar("status", { length: 20 }).default("pending"), // pending, success, failed
   response: text("response"),
-  userId: integer("user_id"), // Who issued the command
-  tripId: integer("trip_id") // Optional association with a trip
+  userId: int("user_id"), // Who issued the command
+  tripId: int("trip_id") // Optional association with a trip
 });
 
 export const insertCommandLogSchema = createInsertSchema(commandLogs).pick({
@@ -164,9 +164,9 @@ export const insertCommandLogSchema = createInsertSchema(commandLogs).pick({
 });
 
 // Rover Client schema - for socket connections
-export const roverClients = pgTable("rover_clients", {
-  id: serial("id").primaryKey(),
-  roverId: integer("rover_id").notNull(),
+export const roverClients = mysqlTable("rover_clients", {
+  id: int("id").primaryKey().autoincrement(),
+  roverId: int("rover_id").notNull(),
   connected: boolean("connected").default(false),
   lastPing: timestamp("last_ping"),
   socketId: varchar("socket_id", { length: 255 }),
