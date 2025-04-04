@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import Stats from "@/components/dashboard/Stats";
+import Stats from "@/components/rovers/Stats";
 import RoverList from "@/components/rovers/RoverList";
 import CommandConsole from "@/components/dashboard/CommandConsole";
 import RoverControl from "@/components/dashboard/RoverControl";
-import SensorDataDisplay from "@/components/dashboard/SensorData";
+import SensorDataDisplay from "@/components/rovers/SensorData";
 
 const Rovers = () => {
   const [selectedRoverId, setSelectedRoverId] = useState<number | undefined>(
@@ -19,9 +19,9 @@ const Rovers = () => {
         </p>
       </div>
 
-      {/*<Stats />*/}
+      <Stats />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/*<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="col-span-1">
           <RoverList
             className="mb-6"
@@ -47,7 +47,7 @@ const Rovers = () => {
             </div>
           )}
         </div>
-      </div>
+      </div>*/}
     </>
   );
 };

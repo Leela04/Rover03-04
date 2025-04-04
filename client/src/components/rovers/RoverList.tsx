@@ -5,6 +5,8 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Rover } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatDistanceToNow } from "date-fns";
+import { BatteryFull, Clock } from "lucide-react";
 
 export interface RoverListProps {
   className?: string;
@@ -54,6 +56,10 @@ const getStatusLabelColor = (status?: string, connected?: boolean) => {
     default:
       return "bg-gray-100 text-gray-800";
   }
+};
+const getTimeAgo = (timestamp: Date | null) => {
+  if (!timestamp) return "N/A";
+  return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
 };
 
 const RoverList = ({ className, onSelectRover }: RoverListProps) => {
@@ -116,23 +122,38 @@ const RoverList = ({ className, onSelectRover }: RoverListProps) => {
                     ID: <span className="font-mono">{rover.identifier}</span>
                   </div>
                   <div>
-                    Battery: <span>{rover.batteryLevel}%</span>
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    Last updated:{" "}
-                    {rover.batteryUpdatedAt
-                      ? new Date(rover.batteryUpdatedAt).toLocaleString()
-                      : "N/A"}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <BatteryFull size={20} color="green" />
+                      <span>{rover.batteryLevel}%</span>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                        }}
+                      >
+                        <Clock size={20} color="blue" />
+
+                        <span> {getTimeAgo(rover.lastSeen)}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div className="mt-3 flex space-x-2">
-                  <Button
+                  {/*<Button
                     variant="default"
                     size="sm"
                     onClick={() => onSelectRover && onSelectRover(rover.id)}
                   >
                     Control
-                  </Button>
+                  </Button>*/}
                   <Link href={`/rovers/${rover.id}`}>
                     <Button variant="outline" size="sm">
                       View Details

@@ -3,7 +3,7 @@ import Stats from "@/components/dashboard/Stats";
 import RoverList from "@/components/dashboard/RoverList";
 import CommandConsole from "@/components/dashboard/CommandConsole";
 import RoverControl from "@/components/dashboard/RoverControl";
-import SensorDataDisplay from "@/components/dashboard/SensorData";
+import SensorDataDisplay from "@/components/rovers/SensorData";
 
 const Dashboard = () => {
   const [selectedRoverId, setSelectedRoverId] = useState<number | undefined>();

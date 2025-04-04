@@ -44,7 +44,7 @@ export const sensorData = pgTable("sensor_data", {
   //*pressure: real("pressure"),
   //*altitude: real("altitude"),
   //*heading: real("heading"),
-  //*speed: real("speed"),
+  speed: real("speed"),
   //*tilt: real("tilt"),
   latitude: real("latitude"),
   longitude: real("longitude"),
@@ -52,6 +52,9 @@ export const sensorData = pgTable("sensor_data", {
   signalStrength: integer("signal_strength"),
   cpuUsage: real("cpu_usage"), // % CPU usage (e.g., 35.25)
   memoryUsage: real("memory_usage"), // % Memory usage (e.g., 65.75)
+  distanceTraveled:real("distanceTraveled"),
+  trips:real("trips"),
+  lastPosition:real("lastPosition"),
   
 
 });
@@ -63,7 +66,7 @@ export const insertSensorDataSchema = createInsertSchema(sensorData).pick({
   //*pressure: true,
   //*altitude: true,
   //*heading: true,
-  //*speed: true,
+  speed: true,
   //*tilt: true,
   latitude: true,
   longitude: true,
@@ -71,6 +74,9 @@ export const insertSensorDataSchema = createInsertSchema(sensorData).pick({
   signalStrength: true,
   cpuUsage: true,
   memoryUsage: true,
+  distanceTraveled:true,
+  trips:true,
+  lastPosition:true,
 
 
 });

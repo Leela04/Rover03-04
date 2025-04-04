@@ -39,8 +39,13 @@ const SensorDataDisplay = ({ className, roverId }: SensorDataProps) => {
           temperature: data.temperature,
           //*humidity: data.humidity,
           //*pressure: data.pressure ? data.pressure / 10 : 0, // Scale down for visualization
-          cpuUsage: data.cpuUsage,
-          memoryUsage: data.memoryUsage,
+          batteryLevel: data.batteryLevel,
+          speed: data.speed,
+          //cpuUsage: data.cpuUsage,
+          //memoryUsage: data.memoryUsage,
+          //distanceTraveled: data.distanceTraveled,
+          //trips: data.trips,
+          //lastposition: data.lastPosition || { latitude: 0, longitude: 0 },
         }))
     : [];
 
@@ -63,7 +68,8 @@ const SensorDataDisplay = ({ className, roverId }: SensorDataProps) => {
         <CardTitle>Sensor Data & Telemetry</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          {/*className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Environment Sensors */}
           <div>
             <h4 className="text-sm font-medium mb-3">Environment Sensors</h4>
@@ -83,7 +89,7 @@ const SensorDataDisplay = ({ className, roverId }: SensorDataProps) => {
                       fill="var(--color-success-light)"
                       name="Temperature (°C)"
                     />
-                    <Area
+                    {/*<Area
                       type="monotone"
                       dataKey="cpuUsage" //*"humidity"
                       stroke="var(--color-info)"
@@ -96,7 +102,7 @@ const SensorDataDisplay = ({ className, roverId }: SensorDataProps) => {
                       stroke="var(--color-warning)"
                       fill="var(--color-warning-light)"
                       name="Memory usage (%)" //*"Pressure (hPa/10)"
-                    />
+                    />*/}
 
                     <Area
                       type="monotone"
@@ -109,8 +115,8 @@ const SensorDataDisplay = ({ className, roverId }: SensorDataProps) => {
                     <Area
                       type="monotone"
                       dataKey="speed"
-                      stroke="var(--color-info)"
-                      fill="var(--color-info-light)"
+                      stroke="var(--color-warning)"
+                      fill="var(--color-warning-light)"
                       name="speed(m/s)" //*"Humidity (%)"
                     />
                   </AreaChart>
@@ -121,14 +127,14 @@ const SensorDataDisplay = ({ className, roverId }: SensorDataProps) => {
                 </div>
               )}
             </div>
-            <div className="grid grid-cols-4 gap-2 mt-2">
+            <div className="grid grid-cols-3 gap-2 mt-2">
               <div className="bg-gray-50 p-2 rounded border border-gray-200 text-center">
                 <div className="text-xs text-muted-foreground">Temperature</div>
                 <div className="font-medium text-sm">
                   {latestSensorData?.temperature?.toFixed(1) || "--"}°C
                 </div>
               </div>
-              <div className="bg-gray-50 p-2 rounded border border-gray-200 text-center">
+              {/*<div className="bg-gray-50 p-2 rounded border border-gray-200 text-center">
                 <div className="text-xs text-muted-foreground">CPU usage</div>
                 <div className="font-medium text-sm">
                   {latestSensorData?.cpuUsage?.toFixed(0) || "--"}%
@@ -141,7 +147,7 @@ const SensorDataDisplay = ({ className, roverId }: SensorDataProps) => {
                 <div className="font-medium text-sm">
                   {latestSensorData?.memoryUsage?.toFixed(0) || "--"} %
                 </div>
-              </div>
+              </div>*/}
               <div className="bg-gray-50 p-2 rounded border border-gray-200 text-center">
                 <div className="text-xs text-muted-foreground">Battery</div>
                 <div className="font-medium text-sm">
@@ -158,7 +164,7 @@ const SensorDataDisplay = ({ className, roverId }: SensorDataProps) => {
           </div>
 
           {/* Position & Orientation */}
-          <div>
+          {/*<div>
             <h4 className="text-sm font-medium mb-3">Position & Orientation</h4>
             <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 flex items-center justify-center h-40">
               <div className="w-full h-full relative">
@@ -194,6 +200,42 @@ const SensorDataDisplay = ({ className, roverId }: SensorDataProps) => {
                 )}
               </div>
             </div>
+
+            <div className="grid grid-cols-4 gap-2 mt-2">
+              <div className="bg-gray-50 p-2 rounded border border-gray-200 text-center">
+                <div className="text-xs text-muted-foreground">Distance</div>
+                <div className="font-medium text-sm">
+                  {latestSensorData?.distanceTraveled?.toFixed(0) || "--"}m
+                </div>
+              </div>
+              <div className="bg-gray-50 p-2 rounded border border-gray-200 text-center">
+                <div className="text-xs text-muted-foreground">Trips Count</div>
+                <div className="font-medium text-sm">
+                  {latestSensorData?.trips?.toFixed(0) || "--"}
+                </div>
+              </div>
+              <div className="bg-gray-50 p-2 rounded border border-gray-200 text-center">
+                <div className="text-xs text-muted-foreground">
+                  Last Position
+                </div>
+                <div className="font-medium text-sm">
+                  {latestSensorData?.lastPosition
+                    ? `${latestSensorData.lastPosition.latitude?.toFixed(
+                        2
+                      )}, ${latestSensorData.lastPosition.longitude?.toFixed(
+                        2
+                      )}`
+                    : "--"}
+                </div>
+              </div>
+              <div className="bg-gray-50 p-2 rounded border border-gray-200 text-center">
+                <div className="text-xs text-muted-foreground">Speed</div>
+                <div className="font-medium text-sm">
+                  {latestSensorData?.speed?.toFixed(1) || "--"}m/s
+                </div>
+              </div>
+            </div>
+
             {/*<div className="grid grid-cols-4 gap-2 mt-2">
               <div className="bg-gray-50 p-2 rounded border border-gray-200 text-center">
                 <div className="text-xs text-muted-foreground">Altitude</div>
@@ -219,8 +261,8 @@ const SensorDataDisplay = ({ className, roverId }: SensorDataProps) => {
                   {latestSensorData?.tilt?.toFixed(1) || "--"}°
                 </div>
               </div>
-            </div>*/}
-          </div>
+            </div>
+          </div>*/}
         </div>
       </CardContent>
     </Card>

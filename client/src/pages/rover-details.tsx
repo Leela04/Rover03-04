@@ -9,12 +9,12 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RoverControl from "@/components/dashboard/RoverControl";
-import SensorDataDisplay from "@/components/dashboard/SensorData";
+import SensorDataDisplay from "@/components/rovers/SensorData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-
+import MapVisual from "@/components/rovers/Mapvisual";
 const RoverDetails = () => {
-  const { id: roverId } = useParams<{ id: string }>();
+  const { id: roverId } = useParams<{ id: number }>();
   //const roverId = parseInt(id);
 
   const { data: rover, isLoading: isRoverLoading } = useQuery<Rover>({
@@ -98,23 +98,27 @@ const RoverDetails = () => {
         </p>
       </div>
 
-      <Tabs defaultValue="control">
+      <Tabs defaultValue="data">
         <TabsList className="mb-6">
-          <TabsTrigger value="control">Control</TabsTrigger>
+          {/*<TabsTrigger value="control">Control</TabsTrigger>*/}
           <TabsTrigger value="data">Sensor Data</TabsTrigger>
-          <TabsTrigger value="logs">Command Logs</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
+          <TabsTrigger value="Maps">Map</TabsTrigger>
+          {/*<TabsTrigger value="logs">Command Logs</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>*/}
         </TabsList>
 
-        <TabsContent value="control">
+        {/*<TabsContent value="control">
           <RoverControl roverId={roverId} />
-        </TabsContent>
+        </TabsContent>*/}
 
         <TabsContent value="data">
           <SensorDataDisplay roverId={roverId} />
         </TabsContent>
+        <TabsContent value="Maps">
+          <MapVisual roverId={roverId} />
+        </TabsContent>
 
-        <TabsContent value="logs">
+        {/*<TabsContent value="logs">
           <Card>
             <CardHeader>
               <CardTitle>Command History</CardTitle>
@@ -280,7 +284,7 @@ const RoverDetails = () => {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabsContent>*/}
       </Tabs>
     </>
   );

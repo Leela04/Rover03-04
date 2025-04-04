@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Shield, Zap, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
-import RoverList from "@/components/dashboard/RoverList";
+import RoverList from "@/components/rovers/RoverList";
 
 export interface StatsProps {
   className?: string;
@@ -54,7 +54,7 @@ interface StatsData {
 }
 
 const Stats = ({ className }: StatsProps) => {
-  const [activeCard, setActiveCard] = useState<string>("Registered Rovers");
+  const [activeCard, setActiveCard] = useState<string>("Active Rovers");
 
   const { data, isLoading } = useQuery<StatsData>({
     queryKey: ["/api/stats"],
@@ -76,7 +76,7 @@ const Stats = ({ className }: StatsProps) => {
   }
 
   const stats = [
-    {
+    /*{
       title: "Registered Rovers",
       value: data?.registeredRovers ?? 0,
       icon: <Shield className="h-6 w-6 text-primary" />,
@@ -93,7 +93,7 @@ const Stats = ({ className }: StatsProps) => {
       content: (
         <p className="p-4 bg-green-100 rounded">Enabled Rovers Details...</p>
       ),
-    },
+    },*/
     {
       title: "Active Rovers",
       value: data?.activeRovers ?? 0,
@@ -112,14 +112,14 @@ const Stats = ({ className }: StatsProps) => {
       content: (
         <p className="p-4 bg-gray-100 rounded">Inactive Rovers Details...</p>
       ),
-    },
+    } /*
     {
       title: "System Logs",
       value: data?.systemLogs ?? 0,
       icon: <AlertCircle className="h-6 w-6 text-destructive" />,
       color: "bg-accent/10",
       content: <p className="p-4 bg-red-100 rounded">System Logs Details...</p>,
-    },
+    },*/,
   ];
 
   return (
