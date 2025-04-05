@@ -2,10 +2,12 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
-import { messageSchema, type WebSocketMessage } from "@shared/schema";
+import { messageSchema, rovers, type WebSocketMessage } from "@shared/schema";
 import { z } from "zod";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
+import { initializeDatabase } from "./db";
+import { eq, and } from 'drizzle-orm';
 
 // Helper function to ensure all messages have timestamp
 function ensureTimestamp(message: Partial<WebSocketMessage>): WebSocketMessage {
@@ -393,17 +395,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API Routes
   
   // Get all rovers
+  // app.get('/api/rovers', async (req, res) => {
+  //   try {
+  //     const rovers = await storage.getAllRovers();
+  //     res.json(rovers);
+  //   } catch (error) {
+  //     res.status(500).json({
+  //       message: 'Error fetching rovers',
+  //       error: (error as Error).message
+  //     });
+  //   }
+  // });
+
   app.get('/api/rovers', async (req, res) => {
+    const customer = req.query.customer as string | undefined;
+    const status = req.query.status as string | undefined;
+  
+    const db = await initializeDatabase();
+  
+    if (!db) {
+      return res.status(500).json({ success: false, message: 'Database not initialized' });
+    }
+  
     try {
-      const rovers = await storage.getAllRovers();
-      res.json(rovers);
+      let query = 'SELECT * FROM rovers';
+      const params: any[] = [];
+  
+      if (customer && status) {
+        query += ' WHERE customer_id = ? AND status = ?';
+        params.push(customer, status);
+      } else if (customer) {
+        query += ' WHERE customer_id = ?';
+        params.push(customer);
+      } else if (status) {
+        query += ' WHERE status = ?';
+        params.push(status);
+      }
+  
+      const [rows] = await db.execute(query, params);
+      return res.json({ success: true, data: rows });
     } catch (error) {
-      res.status(500).json({
-        message: 'Error fetching rovers',
-        error: (error as Error).message
-      });
+      console.error('API error:', error);
+      return res.status(500).json({ success: false, message: 'Internal server error' });
     }
   });
+  
   
   // Get specific rover
   app.get('/api/rovers/:id', async (req, res) => {

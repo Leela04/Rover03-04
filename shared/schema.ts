@@ -1,4 +1,15 @@
-import { pgTable, varchar, integer, boolean, timestamp, jsonb, doublePrecision, text, serial } from "drizzle-orm/pg-core";
+import { mysqlTable } from "drizzle-orm/mysql-core";
+import {
+  pgTable,
+  varchar,
+  integer,
+  boolean,
+  timestamp,
+  jsonb,
+  doublePrecision,
+  text,
+  serial,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -15,7 +26,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
 });
 
 // Customer schema for companies who own rovers
-export const customers = pgTable("customers", {
+export const customers = mysqlTable("customers", {
   id: serial("id").primaryKey(),
   companyName: varchar("company_name", { length: 100 }).notNull(),
   location: varchar("location", { length: 255 }).notNull(),
@@ -44,7 +55,9 @@ export const roverCustomerMatrix = pgTable("rover_customer_matrix", {
   isActive: boolean("is_active").default(true),
 });
 
-export const insertRoverCustomerMatrixSchema = createInsertSchema(roverCustomerMatrix).pick({
+export const insertRoverCustomerMatrixSchema = createInsertSchema(
+  roverCustomerMatrix
+).pick({
   roverId: true,
   roverName: true,
   customerId: true,
@@ -52,24 +65,27 @@ export const insertRoverCustomerMatrixSchema = createInsertSchema(roverCustomerM
 });
 
 // Rover details schema (expanded from previous version)
-export const rovers = pgTable("rovers", {
+export const rovers = mysqlTable("rovers", {
   id: serial("id").primaryKey(),
-  matrixId: integer("matrix_id").notNull(), // References the roverCustomerMatrix table
+  matrixId: int("matrix_id").notNull(),
+  customerId: int("customer_id")
+    .notNull()
+    .references(() => customers.id),
   name: varchar("name", { length: 100 }).notNull(),
   identifier: varchar("identifier", { length: 20 }).notNull().unique(),
   connected: boolean("connected").default(false),
-  status: varchar("status", { length: 20 }).default("disconnected"), // disconnected, idle, active, error
-  batteryLevel: integer("battery_level").default(100),
+  status: varchar("status", { length: 20 }).default("disconnected"),
+  batteryLevel: int("battery_level").default(100),
   lastSeen: timestamp("last_seen"),
-  currentLatitude: doublePrecision("current_latitude"),
-  currentLongitude: doublePrecision("current_longitude"),
-  currentAltitude: doublePrecision("current_altitude"),
-  totalDistanceTraveled: doublePrecision("total_distance_traveled").default(0),
-  totalTrips: integer("total_trips").default(0),
+  currentLatitude: double("current_latitude"),
+  currentLongitude: double("current_longitude"),
+  currentAltitude: double("current_altitude"),
+  totalDistanceTraveled: double("total_distance_traveled").default(0),
+  totalTrips: int("total_trips").default(0),
   ipAddress: varchar("ip_address", { length: 50 }),
-  metadata: jsonb("metadata"),
+  metadata: json("metadata"),
   createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow()
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const insertRoverSchema = createInsertSchema(rovers).pick({
@@ -121,7 +137,7 @@ export const sensorData = pgTable("sensor_data", {
   longitude: doublePrecision("longitude"),
   batteryLevel: integer("battery_level"),
   signalStrength: integer("signal_strength"),
-  tripId: integer("trip_id")
+  tripId: integer("trip_id"),
 });
 
 export const insertSensorDataSchema = createInsertSchema(sensorData).pick({
@@ -150,7 +166,7 @@ export const commandLogs = pgTable("command_logs", {
   status: varchar("status", { length: 20 }).default("pending"), // pending, success, failed
   response: text("response"),
   userId: integer("user_id"), // Who issued the command
-  tripId: integer("trip_id") // Optional association with a trip
+  tripId: integer("trip_id"), // Optional association with a trip
 });
 
 export const insertCommandLogSchema = createInsertSchema(commandLogs).pick({
@@ -171,7 +187,7 @@ export const roverClients = pgTable("rover_clients", {
   lastPing: timestamp("last_ping"),
   socketId: varchar("socket_id", { length: 255 }),
   connectTime: timestamp("connect_time").defaultNow(),
-  disconnectTime: timestamp("disconnect_time")
+  disconnectTime: timestamp("disconnect_time"),
 });
 
 export const insertRoverClientSchema = createInsertSchema(roverClients).pick({
@@ -188,7 +204,9 @@ export type Customer = typeof customers.$inferSelect;
 export type InsertCustomer = z.infer<typeof insertCustomerSchema>;
 
 export type RoverCustomerMatrix = typeof roverCustomerMatrix.$inferSelect;
-export type InsertRoverCustomerMatrix = z.infer<typeof insertRoverCustomerMatrixSchema>;
+export type InsertRoverCustomerMatrix = z.infer<
+  typeof insertRoverCustomerMatrixSchema
+>;
 
 export type Rover = typeof rovers.$inferSelect;
 export type InsertRover = z.infer<typeof insertRoverSchema>;
@@ -208,12 +226,12 @@ export type InsertRoverClient = z.infer<typeof insertRoverClientSchema>;
 // Message types for WebSocket communication
 export const messageSchema = z.object({
   type: z.enum([
-    'CONNECT', 
-    'DISCONNECT', 
-    'COMMAND', 
-    'TELEMETRY', 
-    'STATUS_UPDATE', 
-    'ERROR'
+    "CONNECT",
+    "DISCONNECT",
+    "COMMAND",
+    "TELEMETRY",
+    "STATUS_UPDATE",
+    "ERROR",
   ]),
   payload: z.any(),
   timestamp: z.number().default(() => Date.now()),
