@@ -109,17 +109,25 @@ const Stats = ({ className }: StatsProps) => {
       value: data?.inactiveRovers ?? 0,
       icon: <XCircle className="h-6 w-6 text-accent-100" />,
       color: "bg-gray-100",
-      content: (
-        <p className="p-4 bg-gray-100 rounded">Inactive Rovers Details...</p>
-      ),
-    } /*
+      // <p className="p-4 bg-gray-100 rounded">Inactive Rovers Details...</p>
+      content: <RoverList />,
+    },
+    {
+      title: "Inactive Rovers",
+      value: data?.inactiveRovers ?? 0,
+      icon: <XCircle className="h-6 w-6 text-accent-100" />,
+      color: "bg-gray-100",
+      // <p className="p-4 bg-gray-100 rounded">Inactive Rovers Details...</p>
+      content: <RoverList />,
+    },
+    /*
     {
       title: "System Logs",
       value: data?.systemLogs ?? 0,
       icon: <AlertCircle className="h-6 w-6 text-destructive" />,
       color: "bg-accent/10",
       content: <p className="p-4 bg-red-100 rounded">System Logs Details...</p>,
-    },*/,
+    },*/
   ];
 
   return (

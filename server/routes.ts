@@ -6,6 +6,8 @@ import { messageSchema, type WebSocketMessage } from "@shared/schema";
 import { z } from "zod";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
+import * as fs from 'fs';
+import * as path from 'path';
 
 // Helper function to ensure all messages have timestamp
 function ensureTimestamp(message: Partial<WebSocketMessage>): WebSocketMessage {
@@ -81,6 +83,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             lastSeen: new Date()
           });
         }
+        if (payload.sensorData.currentPosition !== null) {
+          
+          console.log(`Current Position -> x: ${payload.sensorData.currentPosition.x}, y: ${payload.sensorData.currentPosition.y}, z: ${payload.sensorData.currentPosition.z}`);
+        }
+        
+
         
         // Broadcast to frontend clients
         broadcastToFrontend({
@@ -138,6 +146,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }
 
+  /*function downsampleMapData(mapData, zoom, x, y) {
+    // Implement your own logic to downsample or tile the map data based on zoom and x, y position.
+    // For simplicity, we're just returning a subset of the data.
+  
+    // Example: Slice the data to get a smaller section based on zoom and x, y position
+    const chunkSize = 100; // Define how big each chunk is for each tile
+    const startX = x * chunkSize;
+    const startY = y * chunkSize;
+  
+    const downsampledData = mapData.slice(startY, startY + chunkSize).map(row => row.slice(startX, startX + chunkSize));
+  
+    return downsampledData;
+  }*/
+  
+  
+
   // WebSocket connection handler
   wss.on('connection', (ws, req) => {
     const socketId = Math.random().toString(36).substring(2, 15);
@@ -156,6 +180,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const data = JSON.parse(message.toString());
         const validatedMessage = messageSchema.parse(data);
+        let latestMapData: MapData | null = null;
+
+
         
         switch (validatedMessage.type) {
           case 'CONNECT': {
@@ -243,6 +270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               await processTelemetry(client.roverId, validatedMessage.payload);
             }
             break;
+            
           }
           
           case 'COMMAND': {
@@ -334,6 +362,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
             break;
           }
           
+          case 'MAP_DATA':{
+            console.log("📡 Received MAP_DATA from Rover!");
+            if (!validatedMessage.payload.mapdata) {
+              console.error("❌ Map data is missing in server payload:", validatedMessage.payload);
+            } else {
+          
+              latestMapData = {
+                width: validatedMessage.payload.width,
+                height: validatedMessage.payload.height,
+                resolution: validatedMessage.payload.resolution,
+                origin: validatedMessage.payload.origin,
+                map: validatedMessage.payload.mapdata, // Compressed data
+                timestamp: Date.now()
+              };
+
+            // ✅ Broadcast Map Data to Frontend
+              broadcastToFrontend({
+                type: "MAP_DATA",
+                timestamp: Date.now(),  // ✅ Add timestamp
+
+                payload: {
+                  map: validatedMessage.payload.mapdata,  // Make sure it's mapdata
+                  timestamp: Date.now()
+              }
+          
+              });
+
+            console.log("✅ MAP_DATA Sent to Frontend!");
+            break;
+            }
+          }
+
+          // ✅ Case: Request Latest Map Data
+          case "REQUEST_MAP": {
+            if (latestMapData) {
+                ws.send(JSON.stringify({
+                    type: "MAP_DATA",
+                    payload: latestMapData
+                }));
+            }
+            break;
+          }
+
+
+ 
+          
+          
           case 'ERROR': {
             // Handle error messages
             console.error('Client error:', validatedMessage.payload);
@@ -356,6 +431,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
             break;
           }
+          
+          
         }
       } catch (error) {
         console.error('Error processing message:', error);
@@ -467,6 +544,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const sensorData = await storage.getSensorDataByRoverId(id, limit);
       res.json(sensorData);
+      
+
+      
     } catch (error) {
       res.status(500).json({
         message: 'Error fetching sensor data',
@@ -579,6 +659,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  app.get('/api/map',(req,res)=>{
+  
+    const filePath =path.join(process.cwd(),'server','map_data.json');
+    fs.readFile(filePath,'utf-8',(err,data)=>{
+      if (err) return res.status(500).send('File Not found');
+      res.json(JSON.parse(data));
+    });
+  });
+
+     // Server-side API for downsampled map data
+  /*app.get('/api/map-data/:id', async (req, res) => {
+    try {
+      const { zoom, x, y } = req.query;  // Get zoom and tile position from client request
+      // Parse the rover ID from the URL params
+      const id = parseInt(req.params.id);
+          // Parse the limit from the query string (default to 100 if not provided)
+      const limit = parseInt(req.query.limit as string || '100');
+
+      // Check if roverId is valid
+      if (isNaN(id)) {
+        return res.status(400).json({ message: 'Invalid roverId' });
+      }
+  
+    // Fetch rover data using the roverId
+      const rover = await storage.getRover(id);
+      if (!rover) {
+        return res.status(404).json({ message: 'Rover not found' });
+      }
+
+    // You need to extract the map data from rover's sensor data or telemetry data
+      const mapData = await storage.getSensorDataByRoverId(id,limit);
+
+      // If no map data is found, return a 404 error
+      if (!mapData) {
+        return res.status(404).json({ message: 'Map data not found' });
+      }
+  
+      // Call the downsampling function (you can implement downsampling/tiling logic here)
+      const downsampledData = downsampleMapData(mapData, zoom, x, y);
+
+      res.json(downsampledData);
+    } catch (error) {
+      res.status(500).json({
+        message: 'Error fetching map data',
+        error: error.message
+      });
+    }
+   });*/
+
 
   return httpServer;
 }

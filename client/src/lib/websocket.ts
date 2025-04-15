@@ -7,12 +7,18 @@ type WebSocketContextType = {
   connected: boolean;
   sendMessage: (message: WebSocketMessage) => void;
   lastMessage: WebSocketMessage | null;
+  gpsPosition: { latitude: number; longitude: number } | null;  // ✅ Add this 
+  mapData: { map: string; latitude?: number; longitude?: number } | null;  // ✅
+
 };
 
 const WebSocketContext = createContext<WebSocketContextType>({
   connected: false,
   sendMessage: () => {},
   lastMessage: null,
+  gpsPosition: null,  // ✅ Add default null value
+  mapData: null, // ✅ Add this line
+
 });
 
 export const useWebSocket = () => useContext(WebSocketContext);
@@ -27,6 +33,10 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = (props) => {
   const [connected, setConnected] = useState(false);
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
   const { toast } = useToast();
+  const [gpsPosition, setGpsPosition] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [mapData, setMapData] = useState<{ map: string; latitude?: number; longitude?: number } | null>(null);
+
+
   let reconnectAttempts = 0;
 
 
@@ -101,6 +111,29 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = (props) => {
                   description: message.payload?.message || "An unknown error occurred",
                 });
                 break;
+
+              case 'MAP_DATA': // ✅ Handle GPS Data separately
+                const payload = message.payload;
+                console.log("📡 Received MAP_DATA payload:", payload);
+
+                if (!payload?.map) {
+                  console.error("❌ map object  is missing fro payload:", payload);
+                } else {
+                 // Handle compressed map data (store it or pass to renderer)
+                 setMapData(payload);  // or extract fields if needed
+
+
+                  if (message.payload?.latitude && message.payload?.longitude) {
+                    setGpsPosition({
+                      latitude: payload.latitude,
+                      longitude: payload.longitude,
+                    });
+                  }
+                }
+                console.log("Updating mapData:", message);
+
+                break;
+          
             }
           } catch (error) {
             console.error('Error parsing WebSocket message:', error);
@@ -160,7 +193,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = (props) => {
       connectWebSocket();
     }
   
-    //connectWebSocket();
     
     // Reconnect when tab becomes visible
     const handleVisibilityChange = () => {
@@ -199,7 +231,9 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = (props) => {
   const contextValue: WebSocketContextType = {
     connected,
     sendMessage,
-    lastMessage
+    lastMessage,
+    gpsPosition,  // ✅ Provide the GPS position to the context
+    mapData,
   };
 
   return React.createElement(
